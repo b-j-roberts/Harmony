@@ -1,0 +1,42 @@
+***********************************************************
+*
+*
+*  C++ Config File Reader by Brandon Roberts
+*  Version 0.00 Update : I just made a readme...
+*
+*
+***********************************************************
+
+** READ **
+----------
+
+This loads config settings designated in a passed file, can load all settings to be used (will load all as strings)
+                                                        also could only load on call, this allows typing
+
+** Notes **
+-----------
+
+This is the layout of a config file, and what it will load:
+
+"Config.txt"
+information: {
+
+  cats: { sam, bethany, tony }
+
+  dog: ruffis;
+
+}
+
+info: {
+ 
+  time: 15:00:00;
+
+}
+
+If loading all: 
+
+
+If loading by call:
+
+
+Note : Spacing doesn't matter, only indicators like, '{', '}', ':', ';', ',' .

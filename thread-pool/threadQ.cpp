@@ -1,23 +1,25 @@
-#include <iostream>
+#include <iostream> // Testing includes
 #include <string>
 
-#include <queue>
+#include <queue> // Necessary includes
 #include <functional>
 #include <tuple>
 #include <memory>
 
+// g++ -c -g -std=c++17 threadQ.cpp
+
 // TO DO : Make sure to implement locking of thread_queue in the place that it is being handled
 //         This is to allow thread safety and exception safety of the pop and top functions
+// TO DO : Create some kind of locking class so that there is not multiple of the same class functions. etc
+//         taking up processes in which they cant be invoked at the same time
 
 /*
- * Thread Queue class, this stores functions to processed by a list
+ * Task Queue class, this stores functions to processed by a list
  * of threads. These threads will pop off functions from this queue
  * so that they can be run concurrently.
  *
  * Notes:
  *   Only stores void functions which take no parameters in the queue
- *     this is so that any function grabbed wont need to be taken 
- *     in any order other than the way it is given in the queue
  *   This being said, we can push functions with return types, but the
  *     return will be absorbed.
  *   We can also pass functions with parameters, but these params must
@@ -27,67 +29,11 @@
  */
 
 // MAJOR ISSUE ! NEED TO PROCESS THINGS IN ORDER GIVEN ! this is in case of state change before some other function uses a shared resource.
-
-// TO DO : clean up and document how to use
-/*class thread_queue {
-  
-    // Non-Copyable
-    thread_queue(const thread_queue&);
-    thread_queue& operator=(const thread_queue&);
-
-    template <typename Ret, typename... Params>
-    struct callable {
-
-      Ret (&func)(Params...);
-      std::tuple<Params...> params;
-
-      template <typename... Params2>
-      callable(Ret (&func1)(Params...), Params2&&... params):
-        func(func1),
-        params(std::foward<Params2>(params)...) { }
-
-      void operator()() {
-        std::apply(func, std::move(params));
-      }
-
-    };
-
-    std::queue<std::function<void()>> thread_q_; // The actual queue
-
-  public:
-
-    // TO DO : Constructor, Destructor, move operations ?
-    thread_queue() = default;
-
-    // TO DO : Use move semantics ?
-    void push(std::function<void()> func) { thread_q_.push(func); } // push member to add void() function to queue
-
-    // Cast any other, ie non void() functions into void() functions by using
-    //   lambda to call the function with passed params, and absorb the return value
-    template <typename Ret, typename ... Params>
-    void push(Ret (&func), Params&&... params) {
-      std::function<void()> temp = std::bind(func, std::forward<Params>(params)...); 
-      push(std::move(temp));
-    }
-
-    // TO DO : create an ability to assign the return value to some passed reference ?
-    //         check how these function pushes act with things like member functions,
-    //           other functions in different namespaces, ...
-
-    // Thread Safety Note : Do not use pop and front without locking mutex and grouping them !
-    void pop() { thread_q_.pop(); } 
-
-    std::function<void()> front() { return thread_q_.front(); } // TO DO : Return a reference?
-
-    bool empty() { return thread_q_.empty(); }
-
-    // TO DO : Other member functions from queue ?
-
-
-    // TO DO : Somehow allow return values to be returned ?
-};
-*/
-// structs? template objects? other callables ?`
+// MAJOR ISSUE ! Passing classes as ref, for member function calls, seem to wipe memory of some types.
+//   Possible fix ? Create a function member class that holds shared pointer to class type passed, holding class
+//
+// TO DO : Consider using a class to store references to parameters and actually invoking the parameters later ?
+// TO DO : Consider having an option to save return value of function to some passed parameter ?
 
 // Template initialization
 template<typename T>
@@ -99,7 +45,7 @@ class move_only_function<R(Args...)> {
 
   // Base struct to allow polymorphism of callable template object
   struct callable_base {
-    virtual R operator()(Args... args) = 0;
+    virtual void operator()(Args... args) = 0;
     virtual ~callable_base() = default;
   };
 
@@ -110,8 +56,8 @@ class move_only_function<R(Args...)> {
     callable(const F& f): func(f) { }
     callable(F&& f): func(std::move(f)) { }
 
-    virtual R operator()(Args... args) override { // TO DO : Return value
-      return static_cast<R>(func(args...));
+    virtual void operator()(Args... args) override {
+      func(args...);
     }
   };
 
@@ -128,8 +74,8 @@ public:
   move_only_function(F&& f): func(std::make_unique<callable<F>>(std::forward<F>(f))) { }
 
   template<typename... Args2>
-  R operator()(Args2&&... args) { // TO DO : And here
-    return (*func)(std::forward<Args2>(args)...);
+  void operator()(Args2&&... args) {
+    (*func)(std::forward<Args2>(args)...);
   }
 
 };
@@ -138,58 +84,53 @@ public:
 //   This instantiates move_only_function<void()> and each unique function signature added instanciates the member operators and template move constructors
 //
 //   TO DO : Future optimization would be to include a small buffer optimization
-class thread_queue {
+class task_queue {
 
-  // The thread queue
-  std::queue<move_only_function<void()>> thread_q_;
+  // The task queue
+  std::queue<move_only_function<void()>> task_q_;
 
 public:
 
-  thread_queue() = default;
+  task_queue() = default;
 
-  void push(move_only_function<void()> func) { thread_q_.push(std::move(func)); }
+  void push(move_only_function<void()> func) { task_q_.push(std::move(func)); }
 
-  template<typename R, typename... Params>
-  void push(R (&func), Params&&... params) {
-    thread_q_.push(move_only_function<void()>{
-      [&, tup=std::make_tuple(std::forward<Params>(params)...)]() mutable {
-          return std::apply(func, std::move(tup));
+  template<typename Fn, typename... Params>
+  void push(Fn&& fn, Params&&... params) {
+    task_q_.push(move_only_function<void()>{
+      [fun=std::forward<Fn>(fn), tup=std::make_tuple(std::forward<Params>(params)...)]() mutable {
+          return std::apply(std::move(fun), std::move(tup));
       }});
   }
 
-  void pop() { thread_q_.pop(); }
+  void pop() { task_q_.pop(); }
 
-  move_only_function<void()>& front() { return thread_q_.front(); }
-
-};
-
-class callable_obj {
-
-  int j;
-
-  public:
-
-    callable_obj(): j(19) { }
-
-    int operator()() { std::cout << "callable object" << j << std::endl; }
+  move_only_function<void()>& front() { return task_q_.front(); }
 
 };
 
+/*
 class testclass {
 
   int mem1;
   std::string mem2;
+  int mem3;
 
   public:
 
-    testclass(): mem1(5), mem2("cats") { }
+    testclass(int a): mem1(a), mem2("cats"), mem3(6) { 
+      std::cout << "cats constructed" << std::endl;
+    }
 
-    // TO DO : Add ability to call non-static member functions
     static void mfunc1() { std::cout << "Inside of mfunc1" << std::endl; }
-    void mfunc2(int g) { std::cout << "Inside of mfunc2" << mem1 + g << std::endl; }
-    int mfunc3() { std::cout << "Inside of mfunc3" << mem2 << std::endl; }
+    void mfunc2(int g) { std::cout << "Inside of mfunc2" << mem2 << " " << mem1 + g << " " << mem3 << std::endl; }
+    int mfunc3() { 
+      mem1 = 5; 
+      std::cout << "Inside of mfunc3" << mem2 << " " << mem1 << std::endl; 
+      //mem2 = "other";
+    }
     int mfunc4(int c) { std::cout << "Inside of mfunc3" << c << std::endl; }
-
+    void operator()(int k) { std::cout << "Op worked" << k << std::endl;}
 };
 
 void func1() {
@@ -233,10 +174,10 @@ void func5(MoveOnly m) {
 }
 
 int main() {
-  thread_queue test;
+  task_queue test;
  // WORKS FOR OBJECTS OUT OF SCOPE
+  testclass tester1(3);
  {
-  testclass tester1;
   int i = 10;
   int j = 5;
   int k = 2;
@@ -244,10 +185,11 @@ int main() {
   test.push(func2, i);
   test.push(func3);
   test.push(func4, j, k);
- // test.push(tester1.mfunc1);
- // test.push(std::mem_fun(tester1.mfunc2), 5);
- // test.push(tester1.mfunc3);
- // test.push(tester1.mfunc4, k);
+  test.push(tester1.mfunc1);
+  test.push(&testclass::mfunc2, tester1, 4);
+  test.push(&testclass::mfunc3, &tester1);
+  test.push(&testclass::mfunc2, std::move(tester1), 5);
+  test.push(&testclass::mfunc2, std::ref(tester1), 5);
   std::cout << i << " " << j << " " << k << std::endl;
  }
   test.front()();
@@ -258,15 +200,18 @@ int main() {
   test.pop();
   test.front()();
   test.pop();
-  //test.front()();
-  //test.pop();
-  //test.front()();
-  //test.pop();
-  //test.front()();
-  //test.pop();
-  //test.front()();
-  //test.pop();
+  test.front()();
+  test.pop();
+  test.front()();
+  test.pop();
+  test.front()();
+  test.pop();
+  test.front()();
+  test.pop();
+  test.front()();
+  test.pop();
 
+  tester1.mfunc2(2);
   int x = 7;
   test.push(sfunc1, 4);
   test.push(sfunc1, x);
@@ -295,8 +240,21 @@ int main() {
   test.front()();
   test.pop();
 
+  int thisone = 5;
+  test.push([thisonem=std::ref(thisone)](int i){ std::cout << thisonem + i << std::endl; }, 6);
+  test.front()();
+  thisone=4;
+  test.front()();
+  test.pop();
+
+  testclass tester2(4);
+  test.push(tester2, 3);
+  test.front()();
+  test.pop();
+
   std::cout << "IT WORKED BABY!" << std::endl;
 
   return 0;
 
 }
+*/

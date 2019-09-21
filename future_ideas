@@ -1,3 +1,5 @@
 container holding types ? Has iterator that can loop through and obtain types
   to be used in some other app ?
 argument parser library ? Maybe make it depend on the above ?
+arbitrarily large integer
+Config reader

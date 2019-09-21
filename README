@@ -1,0 +1,49 @@
+***********************************************************
+*
+*
+*  Harmony C++ Library by Brandon Roberts
+*  Version 0.01 Update : The Origin
+*
+*
+***********************************************************
+
+** PROJECTS **
+---------------
+
+* Thread Pool - This is an implementation of a thread pool design structure using c++ thread objects.
+                Currently not completed : Need to learn more about threading first
+  *  thread-pool/threadQ.cpp - task queue implementation
+
+* Argument Parser - This is a argument parser object (python-esk) that will allow general command line argument parsing
+                    Currently not completed : Need to learn more template metaprogramming for one part
+  *  arg_parser/compiletime_parse/arg_parser.cpp - compile time implementation
+       NOTES: Need to find a compile time way to store arguments, and implement a constexpr object w/ funct to deal with it
+              Possible solution? Use parse method to instanciate all templates needed to access and store all things given from add_argument function calls
+  *  arg_parser/runtime_parse/arg_parser.cpp - run time implementation
+       NOTES: Simpler, but runtime. This is the current solution until I decide to do compile time version
+              MAJOR ISSUE : I believe this to be impossible, unless indicating the type being accessed each time you access the argument
+
+** READ **
+----------
+
+* Thread Pool - How to use ?
+    #include <thread_pool> ?
+    ... explain how to use here ...
+
+* Argument Parser - How to use ?
+    #include <parser> ?
+    ... explain how to use here ...
+
+
+** Issues **
+------------
+
+The only known issue is that nothing is fully implemented yet
+
+
+** Notes **
+-----------
+
+See file ./future_ideas for future ideas and things for this library
+ 
+Note things I recommend, or think here ...
