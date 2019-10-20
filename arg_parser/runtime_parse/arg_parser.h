@@ -1,10 +1,15 @@
 #include <iostream> // Debug only
+#include <boost/lexical_cast.hpp>
+
 #include <typeinfo> 
+#include <stdexcept>
 
 #include <vector>
 #include <string>
 #include <memory>
 #include <map>
+
+// TO DO : Introduce namespaces? harmony { } & parser? { }
 
 class argument_base {
 
@@ -12,13 +17,11 @@ class argument_base {
   argument_base(const argument_base&);
   argument_base& operator=(const argument_base&);
 
-  bool set;
   const std::string desc;
-  const bool required;
 
 public:
 
-  argument_base(std::string&& d, bool r): set(false), desc(std::move(d)), required(r) { }
+  argument_base(std::string&& d): desc(std::move(d)) { }
   
 };
 
@@ -39,7 +42,7 @@ class argument : public argument_base {
 
 public:
 
-  argument(std::string&& d, bool r): argument_base(std::move(d), r) { }
+  argument(T val, std::string&& d): argument_base(std::move(d)), value_(val) { }
 
   typename arg_ret<T>::type value() const { return value_; }
 
@@ -47,47 +50,110 @@ public:
 
 class Parser {
 
+  std::vector<std::unique_ptr<argument_base>> args_; // Holds list of arg values if set
+  const std::string desc_;
+  std::map<std::string, size_t> name_to_pos_; // map from name given in add_argument to position in args_
+
+  bool parsed;
+
   // NON COPYABLE
   Parser(const Parser&);
   Parser& operator=(const Parser&); 
 
-  static std::vector<std::unique_ptr<argument_base>> possible_args_; // Holds list of possible args & values if set
-  const std::string desc_; // description of parser
-  static std::map<std::string, size_t> name_to_pos_; // map from name given in add_argument to position in possible_args_
+  struct Pre_Parser {
+    
+    std::map<std::string, std::string> pre_parsed_;
+    void clear() { pre_parsed_.clear(); }
 
-public:
+    std::string help_string;
+    bool show_help;
 
-  explicit Parser() = default;
-  explicit Parser(const std::string& s): desc_(s) { }
+    Pre_Parser(int argc, char** argv, const std::string& s): help_string(s + '\n'), show_help(false) {
+      for(size_t i = 1; i < argc - 1; ++i) {
+        if(argv[i][0] == '-') { // TO DO : Maybe change this condition later and use vectors to store info in pre_parsed_?
+          if(pre_parsed_.count(argv[i]) == 0) {
+            pre_parsed_[argv[i]] = argv[i+1];
+          } else {
+            help_string += "           Make sure not to use same flag twice!\n";
+            show_help = true; // TO DO : Think about if value starts with '-'
+                              //         also what if name and id given
+          }
+        }
+      }
+    }
 
-  template<typename T>
-  void add_argument(const std::string& id, const std::string& name, std::string&& desc, bool required = false) {
-    possible_args_.emplace_back(std::make_unique<argument<T>>(std::forward<std::string>(desc), required));
+    Pre_Parser(int argc, char** argv): show_help(false) {
+      for(size_t i = 1; i < argc - 1; ++i) {
+        if(argv[i][0] == '-') { // TO DO : Maybe change this condition later and use vectors to store info in pre_parsed_?
+          if(pre_parsed_.count(argv[i]) == 0) {
+            pre_parsed_[argv[i]] = argv[i+1];
+          } else {
+            help_string += "           Make sure not to use same flag twice!\n";
+            show_help = true; // TO DO : Think about if value starts with '-'
+                              //         also what if name and id given
+          }
+        }
+      }
+    }
+
+  } pre_;
+
+  void help() {
+    throw std::runtime_error(pre_.help_string); 
   }
 
   template<typename T>
-  typename arg_ret<T>::type access(size_t idx) {
-    argument<T>* tmp = static_cast<argument<T>*>(possible_args_[idx].get());
+  typename arg_ret<T>::type get(size_t idx) {
+    argument<T>* tmp = static_cast<argument<T>*>(args_[idx].get());
     std::unique_ptr<argument<T>> derived_ptr;
-    possible_args_[idx].release();
+    args_[idx].release();
     derived_ptr.reset(tmp);
     typename arg_ret<T>::type val = derived_ptr->value();
     return val;
   }
 
+public:
+
+  explicit Parser(int argc, char** argv):  pre_(argc, argv), parsed(false) { }
+  explicit Parser(int argc, char** argv, const std::string& s):  pre_(argc, argv, s), desc_(s), parsed(false) { }
+
+  template<typename T>
+  void add_argument(const std::string& id, const std::string& name, std::string&& desc, bool required = false) {
+    pre_.help_string += "           " + id + "  " + name + "  " + desc + "  " + (required ? "(required)\n" : "(not required)\n"); 
+    if(pre_.pre_parsed_.count(id)) {
+      name_to_pos_[name.substr(2)] = args_.size(); // TO DO : Think about not forcing preceding '--'
+      T val = boost::lexical_cast<T>(pre_.pre_parsed_[id]);
+      args_.emplace_back(std::make_unique<argument<T>>(val, std::forward<std::string>(desc)));
+    } else if(pre_.pre_parsed_.count(name)) {
+      name_to_pos_[name.substr(2)] = args_.size(); // TO DO : Think about not forcing preceding '--'
+      T val = boost::lexical_cast<T>(pre_.pre_parsed_[name]);
+      args_.emplace_back(std::make_unique<argument<T>>(val, std::forward<std::string>(desc)));
+    } else {
+      if(required) {
+        pre_.help_string += "           Required argument : " + name.substr(2) + " not given!\n";
+        pre_.show_help = true;
+      }
+    }
+  }
+
+  template<typename T>
+  typename arg_ret<T>::type get(const std::string& name) {
+    if(!parsed) {
+      pre_.help_string += "           Please make sure to call parse function!\n";
+      help();
+    }
+    if(name_to_pos_.count(name)) {
+      return get<T>(name_to_pos_[name]); // TO DO : Check for if name exists and check if parsed
+    } else {
+      pre_.help_string += "           Indexing argument '" + name + "' which is not given!\n";
+      help(); 
+    }
+  }
+
+  void parse() {
+    if(pre_.show_help) help();
+    pre_.clear();
+    parsed = true;
+  }
+
 };
-/*
-int main() {
-
-  Parser parser("This is a parser");
-
-  parser.add_argument<int>("-n", "--num", "This is my favorite number");
-  parser.add_argument<float>("-f", "--float", "This is my favorite float number");
-  parser.add_argument<std::string>("-w", "--word", "This is my favorite word");
-
-  std::cout << typeid(parser.access<int>(0)).name() << " ";
-  std::cout << typeid(parser.access<float>(1)).name() << " ";
-  std::cout << typeid(parser.access<std::string>(2)).name() << "\n";
-
-  return 0;
-}*/
