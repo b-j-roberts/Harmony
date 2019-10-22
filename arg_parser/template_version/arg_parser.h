@@ -60,8 +60,8 @@ public:
 class Parser {
 
   std::vector<std::unique_ptr<argument_base>> args_; // Holds list of arg values if passed
-  const std::string desc_;                           // Description of parser or program (up to implementor)
-  std::map<std::string, size_t> name_to_pos_;        // Map from name given in add_argument to position in args_
+  const std::string desc_;                           // Description of parser or program
+  std::map<std::string, size_t> name_to_pos_;        // Maps name given in add_argument to position in args_
   bool parsed;                                       // Holds if parse() function has been called (required to access members)
 
   // pre-parser struct which loads all passed params like '-id argument' or '--name argument' into a map
@@ -159,6 +159,11 @@ public:
       pre_.help_string += "           Indexing argument '" + name + "' which is not given!\n";
       help(); 
     }
+  }
+
+  // Function which returns true if the argument is in args_ (ie add_argument and passed in)
+  bool has(const std::string& name) {
+    return name_to_pos_.count(name);
   }
 
 };

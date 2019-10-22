@@ -1,0 +1,91 @@
+***********************************************************
+*
+*
+*  Python-esk Argument Parser by Brandon Roberts
+*  Version 1.00 Update : Template Parser Release
+*
+*
+***********************************************************
+
+** Contains **
+--------------
+Harmony/arg_parser/template_version/arg_parser.h
+
+
+** Issues **
+------------
+Listed as TO DO in code:
+  namespaces
+  access argument descriptions outside help
+  forcing '-' and '--' criterion
+  Issue if name and id flags given in call
+
+100 char line limit
+
+
+** Dependencies **
+------------------
+boost/lexical_cast.hpp - for lexical_cast
+
+
+** Compiling **
+---------------
+if included in main.cpp:
+  g++ -c main.cpp
+  g++ main.o -o main
+
+ie. Normal
+
+
+** Interface **
+---------------
+Construction : Parser parser_name(int argc, char** argv)
+               Parser parser_name(int argc, char** argv, string desc)
+               -- argc = argument count , argv = argument array , desc = parser description
+
+To add arguments : add_argument<type>(string id, string name, string desc, bool req)
+                   -- type = argument type , id = id flag of arg , name = name flag of arg
+                      req = if argument is required (defaults to false)
+
+To get argument : get<type>(name)
+                  -- type = arguments type from add_argument , name = name given in add_argument
+
+Check if has arg : has(name)
+                  -- name = name given in add_argument
+                  NOTE : Returns true if argument was passed in and argument was in add_argument
+
+
+Example :
+
+  main.cpp {
+
+    #include "arg_parser.h"
+    ...
+
+    int main(int argc, char** argv) {
+
+      Parser parser(argc, argv, "This is an argument parser");
+ 
+      parser.add_argument<int>("-x", "--xtra", "This is the number of extras", true);
+      parser.add_argument<double>("-p", "--perc", "This is the percent of people");
+      parser.add_argument<string>("-w", "--word", "This is their favorite word");
+
+      parser.parse();
+
+      cout << parser.get<int>("xtra");
+      if(parser.has("perc") && parser.has("word")) {
+        cout << parser.get<double>("perc");
+        cout << parser.get<string>("word");
+      }
+
+      return 0;
+ 
+    }
+
+  }
+
+  g++ -c main.cpp
+  g++ main.o -o main
+
+  ./main -p 0.13 // ERROR : No -x or -xtra flag, which is required
+  ./main -x 13 -p 0.124 --word hello
