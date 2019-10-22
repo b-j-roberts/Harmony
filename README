@@ -47,3 +47,5 @@ The only known issue is that nothing is fully implemented yet
 See file ./future_ideas for future ideas and things for this library
  
 Note things I recommend, or think here ...
+
+Note standard design patterns here (ie function name conventions, ... )

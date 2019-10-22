@@ -3,7 +3,7 @@
 
 int main(int argc, char** argv) {
 
-  Parser parser(argc, argv, "This is a parser");
+  Parser parser(argc, argv);
 
   parser.add_argument<int>("-n", "--num", "This is my favorite number", true);
   parser.add_argument<double>("-f", "--float", "This is my favorite float number");
