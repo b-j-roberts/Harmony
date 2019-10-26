@@ -5,6 +5,7 @@
 #include <map>
 #include <ifstream>
 #include <stdexcept>
+#include <sstream>
 
 #include <boost/algorithm/string/trim.hpp>
 
@@ -61,12 +62,61 @@ char is_valid_bracer(char c) {
 class Config_Reader {
 
   std::map<std::string, Config_Reader> params_; // Map from names of Config Readers to Config Readers in top level of file
-
+  std::map<std::string, std::string> values_; 
   // TO DO : NON-COPYABLE
   //
 
   // Config_Reader from a string
-  Config_Reader(const std::string& str, bool private_mask) { }
+  Config_Reader(const std::string& str, bool private_mask) { 
+    std::istringstream config_in(str);
+    std::string curr_line;
+    while(getline(config_in, curr_line)) {
+      size_t delim_pos = curr_line.find(':');
+      if(delim_pos != std::string::npos) {
+        std::string key = curr_line.substr(0, delim_pos);
+        boost::trim(key);
+        // get value using parenthesis detect
+
+        bool obtained = false;
+        size_t pos = delim_pos + 1;
+        bool begin_accumulate = false;
+        char end_bracer;
+        std::string value;
+        do {
+          size_t line_len = curr_line.length();
+          for(;pos < line_len; ++pos) {
+            if(!begin_accumulate && curr_line[pos] != ' ') {
+              end_bracer = is_valid_bracer(curr_line[pos]);
+              begin_accumulate = true;
+              if(end_bracer == '\001') { // it is line, no bracers
+                value = curr_line.substr(pos);
+                boost::trim(value);
+                obtained = true;
+              } else +++pos; // get inside
+            }
+            if(begin_accumulate && curr_line[pos] == end_bracer) {
+              obtained = true;
+              value += curr_line(0, pos);
+            }
+          }
+          pos = 0;
+          if(!obtained) value += curr_line;
+        } while(!obtained && getline(config_in, curr_line));
+        // TO DO: If not obtained and break, ie inside bracer but no end
+        //
+        // insert into map
+        
+        if(end_bracer == '\001') {
+          // this is a value that needed to be kept
+          this->values.emplace(key, value);
+        } else {
+          // this is another config reader that needs to be constructed from string constructor
+          this->params_.emplace(key, Config_Reader(value, true));
+        }
+      }
+    }
+
+  }
 
 public:
 
@@ -113,10 +163,10 @@ public:
           
           if(end_bracer == '\001') {
             // this is a value that needed to be kept
-            // TO DO : Need to map key to value
+            this->values_.emplace(key, value);
           } else {
             // this is another config reader that needs to be constructed from string constructor
-            params_.emplace(key, Config_Reader(value, true));
+            this->params_.emplace(key, Config_Reader(value, true));
           }
 
         }
