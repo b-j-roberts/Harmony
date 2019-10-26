@@ -46,6 +46,18 @@ public:
 
 };
 
+
+// Returns end bracer of passed char, if invalid returns '\001'
+char is_valid_bracer(char c) {
+  static const size_t delim_num{6};
+  static char valid_inner_start[delim_num] = { '{', '[', ''', '(', '"', '<' };
+  static char valid_inner_end[delim_num] = { '}', ']', ''', ')', '"', '>' };
+  for(size_t i = 0; i < delim_num; ++i) {
+    if(char == valid_inner_start[i]) return valid_inner_end[i];
+  }
+  return '\001';
+}
+
 class Config_Reader {
 
   std::map<std::string, Config_Reader> params_; // Map from names of Config Readers to Config Readers in top level of file
@@ -59,7 +71,7 @@ class Config_Reader {
 public:
 
   // Config_Reader from a file
-  Config_Reader(const std::string& filename) { 
+  explicit Config_Reader(const std::string& filename) { 
     std::ifstream config_in(filename);
     if(config_in.is_open()) {
       std::string curr_line;
@@ -69,7 +81,44 @@ public:
           std::string key = curr_line.substr(0, delim_pos);
           boost::trim(key);
           // get value using parenthesis detect
+
+          bool obtained = false;
+          size_t pos = delim_pos + 1;
+          bool begin_accumulate = false;
+          char end_bracer;
+          std::string value;
+          do {
+            size_t line_len = curr_line.length();
+            for(;pos < line_len; ++pos) {
+              if(!begin_accumulate && curr_line[pos] != ' ') {
+                end_bracer = is_valid_bracer(curr_line[pos]);
+                begin_accumulate = true;
+                if(end_bracer == '\001') { // it is line, no bracers
+                  value = curr_line.substr(pos);
+                  boost::trim(value);
+                  obtained = true;
+                } else +++pos; // get inside
+              }
+              if(begin_accumulate && curr_line[pos] == end_bracer) {
+                obtained = true;
+                value += curr_line(0, pos);
+              }
+            }
+            pos = 0;
+            if(!obtained) value += curr_line;
+          } while(!obtained && getline(config_in, curr_line));
+          // TO DO: If not obtained and break, ie inside bracer but no end
+          //
           // insert into map
+          
+          if(end_bracer == '\001') {
+            // this is a value that needed to be kept
+            // TO DO : Need to map key to value
+          } else {
+            // this is another config reader that needs to be constructed from string constructor
+            params_.emplace(key, Config_Reader(value, true));
+          }
+
         }
       }
     } else {
