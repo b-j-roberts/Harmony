@@ -6,6 +6,7 @@
 #include <ifstream>
 #include <stdexcept>
 #include <sstream>
+#include <pair>
 
 #include <boost/algorithm/string/trim.hpp>
 
@@ -33,7 +34,8 @@ class Parameter {
 
 public:
 
-  // TO DO : Constructor
+  // TO DO : copy Constructor
+  Parameter(const std::string& s): value(s) { } 
 
   int as_int() { return std::stoi(value); }                        // stoi
   int as_int(int base) { return std::stoi(value, nullptr, base); } // stoi with base
@@ -49,20 +51,21 @@ public:
 
 
 // Returns end bracer of passed char, if invalid returns '\001'
-char is_valid_bracer(char c) {
+std::pair<char, char> is_valid_bracer(char c) {
   static const size_t delim_num{6};
   static char valid_inner_start[delim_num] = { '{', '[', ''', '(', '"', '<' };
   static char valid_inner_end[delim_num] = { '}', ']', ''', ')', '"', '>' };
   for(size_t i = 0; i < delim_num; ++i) {
-    if(char == valid_inner_start[i]) return valid_inner_end[i];
+    if(c == valid_inner_start[i]) 
+      return std::make_pair(valid_inner_start[i], valid_inner_end[i]);
   }
-  return '\001';
+  return std::make_pair('\001', '\001');
 }
 
 class Config_Reader {
 
   std::map<std::string, Config_Reader> params_; // Map from names of Config Readers to Config Readers in top level of file
-  std::map<std::string, std::string> values_; 
+  std::map<std::string, Parameter> values_; 
   // TO DO : NON-COPYABLE
   //
 
@@ -80,7 +83,8 @@ class Config_Reader {
         bool obtained = false;
         size_t pos = delim_pos + 1;
         bool begin_accumulate = false;
-        char end_bracer;
+        size_t accumulator = 0;
+        std::pair<char, char> end_bracer;
         std::string value;
         do {
           size_t line_len = curr_line.length();
@@ -88,15 +92,20 @@ class Config_Reader {
             if(!begin_accumulate && curr_line[pos] != ' ') {
               end_bracer = is_valid_bracer(curr_line[pos]);
               begin_accumulate = true;
+              accumulator = 1;
               if(end_bracer == '\001') { // it is line, no bracers
                 value = curr_line.substr(pos);
                 boost::trim(value);
                 obtained = true;
               } else +++pos; // get inside
             }
-            if(begin_accumulate && curr_line[pos] == end_bracer) {
-              obtained = true;
-              value += curr_line(0, pos);
+            if(begin_accumulate) {
+              if(curr_line[pos] == end_bracer.first) ++accumulator;
+              else if(curr_line[pos] == end_bracer.second) --accumulator; // TO DO : rename end_bracer
+              if(accumulator == 0) {
+                obtained = true;
+                value += curr_line(0, pos);
+              }
             }
           }
           pos = 0;
@@ -108,7 +117,7 @@ class Config_Reader {
         
         if(end_bracer == '\001') {
           // this is a value that needed to be kept
-          this->values.emplace(key, value);
+          this->values_.emplace(key, Parameter(value));
         } else {
           // this is another config reader that needs to be constructed from string constructor
           this->params_.emplace(key, Config_Reader(value, true));
@@ -135,7 +144,8 @@ public:
           bool obtained = false;
           size_t pos = delim_pos + 1;
           bool begin_accumulate = false;
-          char end_bracer;
+          size_t accumulator = 0;
+          std::pair<char, char> end_bracer;
           std::string value;
           do {
             size_t line_len = curr_line.length();
@@ -143,15 +153,19 @@ public:
               if(!begin_accumulate && curr_line[pos] != ' ') {
                 end_bracer = is_valid_bracer(curr_line[pos]);
                 begin_accumulate = true;
+                accumulator = 1;
                 if(end_bracer == '\001') { // it is line, no bracers
                   value = curr_line.substr(pos);
                   boost::trim(value);
                   obtained = true;
                 } else +++pos; // get inside
               }
-              if(begin_accumulate && curr_line[pos] == end_bracer) {
-                obtained = true;
-                value += curr_line(0, pos);
+              if(begin_accumulate) {
+                if(curr_line[pos] == end_bracer.first) ++accumulator;
+                else if(curr_line[pos] == end_bracer.second) --accumulator; // TO DO : rename end_bracer
+                if(accumulator == 0) {
+                  obtained = true;
+                  value += curr_line(0, pos);
               }
             }
             pos = 0;
@@ -163,7 +177,7 @@ public:
           
           if(end_bracer == '\001') {
             // this is a value that needed to be kept
-            this->values_.emplace(key, value);
+            this->values_.emplace(key, Parameter(value));
           } else {
             // this is another config reader that needs to be constructed from string constructor
             this->params_.emplace(key, Config_Reader(value, true));
@@ -173,6 +187,24 @@ public:
       }
     } else {
       throw std::runtime_error("Error opening config file : " + filename);
+    }
+  }
+
+  // indexing values
+  Parameter &operator[] (const std::string& param) {
+    if(values_.count(param)) {
+      return values_[param];
+    } else {
+      throw std::out_of_range("Parameter : " + param + " not included!");
+    }
+  }
+
+  // indexing nested config readers
+  Config_Reader config(const std::string& name) {
+    if(params_.count(name)) {
+      return params_[name];
+    } else {
+      throw std::out_of_range("Config Reader : " + name + " not included!");
     }
   }
 
