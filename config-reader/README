@@ -2,16 +2,46 @@
 *
 *
 *  C++ Config File Reader by Brandon Roberts
-*  Version 0.00 Update : I just made a readme...
+*  Version 1.00 Update : Realese!
 *
 *
 ***********************************************************
 
+** Contains **
+--------------
+Harmony/config_reader/config_reader.h
+
+
+** Isssues **
+-------------
+Listed as TO DO in code:
+  Namespaces
+  split source file
+  defaultable parameter
+  ';' termination 
+
+
+** Dependancies **
+------------------
+boost/lexical_cast.hpp - for lexical_cast
+boost/algorithm/string/trim.hpp - for trim
+
+
+** Compiling **
+---------------
+if included in main.cpp:
+  g++ -c main.cpp
+  g++ main.o -o main
+
+ie. Normal
+
+
 ** READ **
 ----------
 
-This loads config settings designated in a passed file, can load all settings to be used (will load all as strings)
-                                                        also could only load on call, this allows typing
+This loads config settings designated in a passed file, loads all as strings and the value
+  will be accessable by calling one of the as_* functions 
+
 
 ** Notes **
 -----------
@@ -21,22 +51,65 @@ This is the layout of a config file, and what it will load:
 "Config.txt"
 information: {
 
-  cats: { sam, bethany, tony }
+  cats: [ sam, bethany, tony ]
 
-  dog: ruffis;
+  dog: ruffis
+
+  house: {
+
+    bedroom : 4
+  
+    bathroom : 2
+
+  }
 
 }
 
 info: {
  
-  time: 15:00:00;
+  time: 15:00:00
 
 }
 
-If loading all: 
+** end of file **
+
+This loads:
+  
+  2 config readers, "information" and "info"
+  
+  information contains :
+    
+     2 parameters, "cats" has "sam, bethany, tony"
+                   "dogs" has "ruffis"
+    
+     1 config reader, "house" which contains 2 parameters, "bedroom" and "bathroom"
+
+   ...
+
+Note : Spacing doesn't matter, only indicators like, '{', '}', ':', ',' , ...
 
 
-If loading by call:
+** Interface **
+----------------
+
+Config_Reader :
+Construction : Config_Reader name(string config_filename/path)
+
+To index Parameters : param(string param_name)
+                      [string param_name]
+
+To index Config Readers : config(string conf_name)
+
+Check if it has conf or param : has_config(string conf_name)
+                                has_param(string param_name)
+
+Nested param indexing : param(config_outer_1::config_outer_2::...::param_name)
 
 
-Note : Spacing doesn't matter, only indicators like, '{', '}', ':', ';', ',' .
+Parameter : 
+Get Parameter value : as_int(), as_int(int base), as_double(), as_float(), as_string(),
+                      as<Type>() -- uses lexical cast
+                      as_vector(), as_map()
+
+Notes : as_vector uses ',' to seperate vector items
+        as_map uses ':' to seperate key and value & uses ',' to seperate items

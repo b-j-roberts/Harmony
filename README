@@ -14,14 +14,9 @@
                 Currently not completed : Need to learn more about threading first
   *  thread-pool/threadQ.cpp - task queue implementation
 
-* Argument Parser - This is a argument parser object (python-esk) that will allow general command line argument parsing
-                    Currently not completed : Need to learn more template metaprogramming for one part
-  *  arg_parser/compiletime_parse/arg_parser.cpp - compile time implementation
-       NOTES: Need to find a compile time way to store arguments, and implement a constexpr object w/ funct to deal with it
-              Possible solution? Use parse method to instanciate all templates needed to access and store all things given from add_argument function calls
-  *  arg_parser/runtime_parse/arg_parser.cpp - run time implementation
-       NOTES: Simpler, but runtime. This is the current solution until I decide to do compile time version
-              MAJOR ISSUE : I believe this to be impossible, unless indicating the type being accessed each time you access the argument
+* Argument Parser - This is a argument parser object (python-esk) that will allow general 
+                      command line argument parsing
+                    FUTURE : as_* function version, so no templates
 
 ** READ **
 ----------

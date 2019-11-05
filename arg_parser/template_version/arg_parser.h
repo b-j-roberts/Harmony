@@ -61,11 +61,11 @@ class Parser {
 
   std::vector<std::unique_ptr<argument_base>> args_; // Holds list of arg values if passed
   const std::string desc_;                           // Description of parser or program
-  std::map<std::string, size_t> name_to_pos_;        // Maps name given in add_argument to position in args_
-  bool parsed;                                       // Holds if parse() function has been called (required to access members)
+  std::map<std::string, size_t> name_to_pos_;        // Maps name in add_argument to pos in args_
+  bool parsed;                                       // if parse() function called (required)
 
-  // pre-parser struct which loads all passed params like '-id argument' or '--name argument' into a map
-  // also holds help_string for help function and if we should show help upon calling parse()
+  // pre-parser struct which loads all passed params like '-id argument' or '--name argument' into
+  // a map, also holds help_string for help function and if we should show help upon calling parse()
   struct Pre_Parser {
     
     std::map<std::string, std::string> pre_parsed_;
@@ -115,13 +115,18 @@ class Parser {
 public:
 
   explicit Parser(int argc, char** argv):  pre_(argc, argv, ""), parsed(false) { }
-  explicit Parser(int argc, char** argv, const std::string& s):  pre_(argc, argv, s), desc_(s), parsed(false) { }
+  explicit Parser(int argc, char** argv, const std::string& s):  
+    pre_(argc, argv, s), 
+    desc_(s), 
+    parsed(false) { }
 
   // Function to add an argument to list of possible arguments
   // This function also appends argument to args_ if it was pre-parsed
   template<typename T>
-  void add_argument(const std::string& id, const std::string& name, std::string&& desc, bool required = false) {
-    pre_.help_string += "           " + id + "  " + name + "  " + desc + "  " + (required ? "(required)\n" : "(not required)\n"); 
+  void add_argument(const std::string& id, const std::string& name, 
+                    std::string&& desc, bool required = false) {
+    pre_.help_string += "           " + id + "  " + name + "  " + desc + 
+                        "  " + (required ? "(required)\n" : "(not required)\n"); 
     if(pre_.pre_parsed_.count(id)) {
       name_to_pos_[name.substr(2)] = args_.size();
       T val = boost::lexical_cast<T>(pre_.pre_parsed_[id]);
@@ -138,7 +143,7 @@ public:
     }
   }
 
-  // Function used to make sure everything has been delt with properly and makes parser ready to work
+  // Makes sure everything has been delt with properly and makes parser ready to work
   void parse() {
     if(pre_.show_help) help();
     pre_.clear();
