@@ -15,6 +15,7 @@
 //         (so one can for loop over all configs/params)
 // TO DO : Defaultable parameter
 // TO DO : Think about ';' for termination
+// TO DO : include reasons
 
 // Stores actual parameter values, and has as_* functions to obtain this value
 class Parameter {

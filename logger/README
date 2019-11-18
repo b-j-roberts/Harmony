@@ -1,0 +1,77 @@
+***********************************************************
+*
+*
+*  Leveled Logger by Brandon Roberts
+*  Version 1.00 Update : Logger Release
+*
+*
+***********************************************************
+
+** Contains **
+--------------
+Harmony/logger/logger.h
+
+** Issues **
+------------
+Listed as TO DO in the code:
+  KILL Level
+  Stream Constructor
+  Allow appending
+  buf size too small?
+  display level?
+
+
+** Dependencies **
+------------------
+NONE
+
+
+** Compiling **
+--------------
+if included in main.cpp:
+  g++ -c main.cpp
+  g++ main.o -o main
+
+ie. Normal
+
+
+** READ **
+----------
+
+This is a leveled logger, ie it will only output messages that are at or "below" 
+  (above in chart below) the log level specified in the constructor
+
+** Interface **
+---------------
+
+Log_Level's : FATAL
+              WARN
+              INFO
+              DEBUG
+
+Construction : 
+    Logger logger_name(string filename, Log_Level level)
+    -- filename = streamed outfile , 
+       level = level to output anything less than (defaults to INFO)
+
+To print : 
+    printf(Log_Level level, char * format, ...)
+    sprintf(Log_Level level, char * format, ...)
+    -- These use sprintf(buf, format, ...) with buf of size 4196 if level <= logger lvl
+
+    printf(Log_Level level, string s)
+    sprintf(Log_Level level, string s)
+    -- These output string s to outfile if level <= logger lvl
+
+    snprintf(Log_Level level, int len, char * format, ...)
+    -- This uses snprint(buf, len, format, ...) with buf of size len if level <= logger lvl
+
+Stream Level : 
+    There is a member named stream_level that holds the current level streamed 
+    messages come in as, defaults to level passed in constructor, and to change use 
+    logger_name << new_level;
+    ie. this will change stream_level to Log_Level new_level
+                    
+Instream operator (<<) : 
+    logger_name << streamable_object
+    NOTE : this streamable_object will be copy constructed, unless a string

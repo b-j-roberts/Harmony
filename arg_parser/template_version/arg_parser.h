@@ -9,6 +9,7 @@
 
 // TO DO : Introduce namespaces? harmony { } & parser? { } & impl namespace ? 
 // TO DO : Think about if people might want to access argument desc or help function/string
+// TO DO : Think about constructor name convention, '-id' & '--name'
 
 
 // Implimentation

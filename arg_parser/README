@@ -35,22 +35,33 @@ if included in main.cpp:
 ie. Normal
 
 
+** READ **
+----------
+
+General argument parser, inspired by the arg_parser in python ( so has very similar interface )
+
+
 ** Interface **
 ---------------
-Construction : Parser parser_name(int argc, char** argv)
-               Parser parser_name(int argc, char** argv, string desc)
-               -- argc = argument count , argv = argument array , desc = parser description
 
-To add arguments : add_argument<type>(string id, string name, string desc, bool req)
-                   -- type = argument type , id = id flag of arg , name = name flag of arg
-                      req = if argument is required (defaults to false)
+Construction : 
+    Parser parser_name(int argc, char** argv)
+    Parser parser_name(int argc, char** argv, string desc)
+    -- argc = argument count , argv = argument array , desc = parser description
 
-To get argument : get<type>(name)
-                  -- type = arguments type from add_argument , name = name given in add_argument
+To add arguments : 
+    add_argument<type>(string id, string name, string desc, bool req)
+    -- type = argument type , id = id flag of arg , name = name flag of arg ,
+       req = if argument is required (defaults to false)
 
-Check if has arg : has(name)
-                  -- name = name given in add_argument
-                  NOTE : Returns true if argument was passed in and argument was in add_argument
+To get argument : 
+    get<type>(name)
+    -- type = arguments type from add_argument , name = name given in add_argument
+
+Check if has arg : 
+    has(name)
+    -- name = name given in add_argument
+    NOTE : Returns true if argument was passed in and argument was in add_argument
 
 
 Example :
@@ -85,5 +96,5 @@ Example :
   g++ -c main.cpp
   g++ main.o -o main
 
-  ./main -p 0.13 // ERROR : No -x or -xtra flag, which is required
+  ./main -p 0.13 // ERROR : No -x or --xtra flag, which is required
   ./main -x 13 -p 0.124 --word hello

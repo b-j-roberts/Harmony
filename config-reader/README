@@ -93,23 +93,30 @@ Note : Spacing doesn't matter, only indicators like, '{', '}', ':', ',' , ...
 ----------------
 
 Config_Reader :
-Construction : Config_Reader name(string config_filename/path)
 
-To index Parameters : param(string param_name)
-                      [string param_name]
+Construction : 
+    Config_Reader name(string config_filename/path)
 
-To index Config Readers : config(string conf_name)
+To index Parameters : 
+    param(string param_name)
+    -- param_name = name of parameter indexing (left of :)
 
-Check if it has conf or param : has_config(string conf_name)
-                                has_param(string param_name)
+To index Config Readers : 
+    config(string conf_name)
+    -- conf_name = name of config indexing (left of : before {)
 
-Nested param indexing : param(config_outer_1::config_outer_2::...::param_name)
+Check if it has conf or param : 
+    has_config(string conf_name)
+    has_param(string param_name)
+
+Nested param indexing : 
+    param(config_outer_1::config_outer_2::...::param_name)
 
 
 Parameter : 
-Get Parameter value : as_int(), as_int(int base), as_double(), as_float(), as_string(),
-                      as<Type>() -- uses lexical cast
-                      as_vector(), as_map()
 
-Notes : as_vector uses ',' to seperate vector items
-        as_map uses ':' to seperate key and value & uses ',' to seperate items
+Get Parameter value : 
+    as_int(), as_int(int base), as_double(), as_float(), as_string(),
+    as<Type>() -- uses lexical cast
+    as_vector() -- comma delimeted
+    as_map() -- colon to seperate key and value, comma delimeted
