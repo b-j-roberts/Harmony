@@ -2,7 +2,7 @@
 *
 *
 *  Harmony C++ Library by Brandon Roberts
-*  Version 0.01 Update : The Origin
+*  Version 0.05 Update : Outside Code Info
 *
 *
 ***********************************************************
@@ -10,31 +10,40 @@
 ** PROJECTS **
 ---------------
 
+* Argument Parser - This is a argument parser object (python-esk) that will allow general 
+                      command line argument parsing
+                    Main object is : Parser
+                    FUTURE : as_* function version, so no templates
+  * arg_parser/template_version/arg_parser.h
+
+
+* Config File Reader - This is a config file reader that is able to read config file info into
+                         a map and then allow access to these config parameters in code
+                       2 Main objects are : Config_Reader & Parameter
+
+
+* Level Logger - This is a logger object that allows log levels, so that one can change the 
+                   types of messages that get logged to an exterior file
+                 Main object is : Logger
+                 FUTURE : add stream constructor that allows the user to choose stream object
+                   to write to ( so one can use cout stream and so on )
+
+
 * Thread Pool - This is an implementation of a thread pool design structure using c++ thread objects.
                 Currently not completed : Need to learn more about threading first
   *  thread-pool/threadQ.cpp - task queue implementation
 
-* Argument Parser - This is a argument parser object (python-esk) that will allow general 
-                      command line argument parsing
-                    FUTURE : as_* function version, so no templates
 
-** READ **
-----------
-
-* Thread Pool - How to use ?
-    #include <thread_pool> ?
-    ... explain how to use here ...
-
-* Argument Parser - How to use ?
-    #include <parser> ?
-    ... explain how to use here ...
-
+NOTE : Each project has its own README that explains how to use and the implemetation 
+       for the specific header files
 
 ** Issues **
 ------------
 
-The only known issue is that nothing is fully implemented yet
+Issues in README's for specific projects
+Search : TO\ DO for list of fixes and issues
 
+Make into an actual library, rather than groups of header files
 
 ** Notes **
 -----------
