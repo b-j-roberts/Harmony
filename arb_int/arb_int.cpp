@@ -1,8 +1,14 @@
 #include <vector>
 #include <map>
 
+#include <ostream>
+
 #include <iostream> // TO DO : Debug
 
+// TO DO : string constructor
+// TO DO : implicit construction?
+// TO DO : mult by 0 removes negative
+// TO DO : Remove leading 0s
 // TO DO : think about division?
 // TO DO : modulus
 // TO DO : different bases?
@@ -31,7 +37,7 @@ public:
 
   // TO DO : Think about when equal
   // tell if lhs is larger than rhs (ignoring sign)
-  bool unsigned_greater(const Integer& lhs, const Integer& rhs) const {
+  static bool unsigned_greater(const Integer& lhs, const Integer& rhs) {
     if(lhs.length() == rhs.length()) {// if same length
       for(size_t i = lhs.length() - 1; i >= 0; --i) {
         if(lhs.number_[i] == rhs.number_[i]) continue;
@@ -44,14 +50,14 @@ public:
   }
 
   // tell if lhs greater than rhs
-  bool greater(const Integer& lhs, const Integer& rhs) const {
+  static bool greater(const Integer& lhs, const Integer& rhs) {
     if(lhs.negative_ xor rhs.negative_) return rhs.negative_; 
     bool flip = lhs.negative_; // if comparing neg or pos, flip bc larger number_ flips return
                                //   depending if positive or negative comparison
     return flip ? !unsigned_greater(lhs, rhs) : unsigned_greater(lhs, rhs);
   }
 
-  bool equal(const Integer& lhs, const Integer& rhs) const {
+  static bool equal(const Integer& lhs, const Integer& rhs) {
     if(lhs.negative_ xor rhs.negative_) return false; // Not same if opposite signs
     if(lhs.length() != rhs.length()) return false;    // Not same if different lengths
     for(size_t i = lhs.length() - 1; i >= 0; --i) { // must be same length and sign
@@ -62,7 +68,7 @@ public:
 
   // lhs is positive and rhs negative
   // add 2 integers of different sign
-  Integer add_different(const Integer& lhs, const Integer& rhs) const {
+  static Integer add_different(const Integer& lhs, const Integer& rhs) {
     Integer ret;
     std::map<size_t, uint8_t> carry_map;
     if(unsigned_greater(lhs, rhs)) { // use lhs as 'top' number
@@ -126,9 +132,9 @@ public:
   }
 
   // add 2 Integers of the same sign
-  Integer add_same(const Integer& lhs, const Integer& rhs) const {
+  static Integer add_same(const Integer& lhs, const Integer& rhs, bool negative) {
     Integer ret; 
-    if(lhs.negative_ && rhs.negative_) ret.negative_ = true; // Adding 2 negatives
+    ret.negative_ = negative; // Adding 2 negatives
     uint8_t carry = 0;
     bool lhs_max = lhs.length() >= rhs.length();
     size_t pos = 0;
@@ -159,7 +165,7 @@ public:
   }
 
   // multiply 2 Integer objects
-  Integer multiply(const Integer& lhs, const Integer& rhs) const {
+  static Integer multiply(const Integer& lhs, const Integer& rhs) {
     Integer ret;
     if(lhs.negative_ xor rhs.negative_) ret.negative_ = true;
     size_t offset = 0;
@@ -200,17 +206,125 @@ public:
     std::cout << std::endl;
   } 
 
+  Integer& operator+=(const Integer&);
+  Integer& operator-=(const Integer&);
+  Integer& operator*=(const Integer&);
+  Integer& operator++();
+  Integer operator++(int);
+  Integer& operator--();
+  Integer operator--(int);
+
 private:
 
   void append(uint8_t i) { number_.push_back(i); }
 
+  friend const Integer operator+(const Integer&, const Integer&);
+  friend const Integer operator-(const Integer&, const Integer&);
+  friend const Integer operator*(const Integer&, const Integer&);
+  
+  friend bool operator==(const Integer&, const Integer&);
+  friend bool operator!=(const Integer&, const Integer&);
+  friend bool operator<(const Integer&, const Integer&);
+  friend bool operator>(const Integer&, const Integer&);
+  friend bool operator<=(const Integer&, const Integer&);
+  friend bool operator>=(const Integer&, const Integer&);
+
+  friend std::ostream& operator<<(std::ostream&, const Integer&);
+
 };
+
+Integer& Integer::operator+=(const Integer& rhs) { // TO DO : Make this define +
+  auto value = *this + rhs;
+  *this = value;
+  return *this;
+}
+
+Integer& Integer::operator-=(const Integer& rhs) { // TO DO : Make this define -
+  auto value = *this - rhs;
+  *this = value;
+  return *this;
+}
+
+Integer& Integer::operator*=(const Integer& rhs) { // TO DO : Make this define *
+  auto value = *this * rhs;
+  *this = value;
+  return *this;
+}
+
+Integer& Integer::operator++() {
+  static const Integer one(1);
+  *this += one;
+  return *this;
+}
+
+Integer Integer::operator++(int) {
+  Integer temp = *this;
+  ++*this;
+  return temp;
+}
+
+Integer& Integer::operator--() {
+  static const Integer neg_one(-1);
+  *this += neg_one;
+  return *this;
+}
+
+Integer Integer::operator--(int) {
+  Integer temp = *this;
+  --*this;
+  return *this;
+}
+
+const Integer operator+(const Integer& lhs, const Integer& rhs) {
+  if(lhs.negative_ == rhs.negative_) return Integer::add_same(lhs, rhs, lhs.negative_);
+  else return lhs.negative_ ? Integer::add_different(rhs, lhs) : Integer::add_different(lhs, rhs);
+}
+
+const Integer operator-(const Integer& lhs, const Integer& rhs) {
+  if(lhs.negative_ == !rhs.negative_) return Integer::add_same(lhs, rhs, lhs.negative_);
+  else return lhs.negative_ ? Integer::add_different(rhs, lhs) : Integer::add_different(lhs, rhs);
+}
+
+const Integer operator*(const Integer& lhs, const Integer& rhs) {
+  return Integer::multiply(lhs, rhs);
+}
+
+bool operator==(const Integer& lhs, const Integer& rhs) {
+  return Integer::equal(lhs, rhs);
+}
+
+bool operator!=(const Integer& lhs, const Integer& rhs) {
+  return !Integer::equal(lhs, rhs);
+}
+
+bool operator<(const Integer& lhs, const Integer& rhs) {
+  return Integer::greater(rhs, lhs);
+}
+
+bool operator>(const Integer& lhs, const Integer& rhs) {
+  return Integer::greater(lhs, rhs);
+}
+
+bool operator<=(const Integer& lhs, const Integer& rhs) {
+  return Integer::greater(rhs, lhs) || Integer::equal(lhs, rhs);
+}
+
+bool operator>=(const Integer& lhs, const Integer& rhs) {
+  return Integer::greater(lhs, rhs) || Integer::equal(lhs, rhs);
+}
+
+std::ostream& operator<< (std::ostream& os, const Integer& s) {
+  if(s.negative_) os << "-";
+  for(size_t i = s.number_.size() - 1; i != -1; --i) os << unsigned(s.number_[i]);
+}
+
+// operators : << , += , -= , *= , ++ , --
 
 int main() {
 
   size_t x = 1239;
 
-  Integer i_1(1000000); 
+  Integer i_1(-100000000); 
   Integer i_2(x); 
   Integer i_3(-12092); 
   Integer i_4(-109); 
@@ -220,13 +334,40 @@ int main() {
   i_3.print();
   i_4.print();
 
-  Integer added_1 = i_1.add_same(i_1, i_4);
+  Integer added_1 = i_1.add_same(i_1, i_4, false);
   added_1.print();
   Integer added_2 = i_1.add_different(i_1, i_4);
   added_2.print();
 
   Integer multiplied = i_1.multiply(i_3, i_2);
   multiplied.print();
+
+
+  Integer added = i_1 + i_4;
+  added.print();
+  (added += i_4) += i_4;
+  added.print();
+
+  added++;
+  added.print();
+  ++added;
+  added.print();
+  added--;
+  added.print();
+  --added;
+  added.print();
+  for(int i = 0; i < 30; ++i) {
+    added *= Integer(10);
+    std::cout << added << std::endl;
+  }
+  for(int i = 0; i < 30; ++i) {
+    added += Integer(i);
+    std::cout << added << std::endl;
+  }
+
+  Integer subtracted = i_1 - i_4;
+
+  subtracted.print();
 
   return 0;
 
