@@ -1,0 +1,60 @@
+***********************************************************
+*
+*
+*  C++ Arbitrary Integer by Brandon Roberts
+*  Version 1.00 Update : Realese!
+*
+*
+***********************************************************
+
+** Contains **
+--------------
+Harmony/arb_int/arb_int.h
+
+
+** Ideas **
+-----------
+
+add a rand() function to give a rand Integer (specify max length? or max Integer? or other?)
+use div_t?
+
+
+** Issues **
+-------------
+Listed as TO DO in code
+
+
+** Dependancies **
+------------------
+None
+
+
+** Compiling **
+---------------
+If included in main.cpp:
+  g++ -c main.cpp
+  g++ main.o -o main.cpp
+
+i.e. Normal
+
+
+** READ **
+----------
+
+This is an integer that can be arbitrarily large (see TO DO for caviot), so represents ZZ space
+
+There is no division or modulus operators at the moment
+
+
+** Interface **
+---------------
+
+Construction :
+   Integer name(int number)  - constructs an Integer from an integral type
+   Integer name{}            - constructs an Integer with value 0
+   Integer name(string s)    - constructs an Integer corresponding to passed string
+
+length() : gives length of the number in digits (not including negative sign)
+
+operators allowed : + , - , * , += , -= , *= , ++ (both sides) , -- (both sides)
+                    == , != , < , > , <= , >= , << (streaming)

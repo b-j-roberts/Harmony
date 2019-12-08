@@ -6,6 +6,10 @@
 
 // TO DO : Change to just button class and allow different kinds of buttons?
 //           ex : circular, rectangular, toggle, push, ...
+//
+// TO DO : Make buttons and things into template of things with draw, position, and size functions
+// TO DO : Make option to allow label to be displayed outside of button (select position?)
+// TO DO : Allow linking of toggle buttons in certain ways so activating one deactivates others?
 
 class Toggle_Button {
   
@@ -30,6 +34,8 @@ class Toggle_Button {
   bool get_state(); // get state
 
   void draw(sf::RenderWindow& window); // draw to window
+
+  friend GUI;
 
 };
 
@@ -97,15 +103,15 @@ class Push_Button {
   sf::Color active_color_;
   sf::Color deactive_color_;
 
-  time total_active_time //(animation and clicking blocking)
-  time start_active      // for calculation of active time
+  time total_active_time; //(animation and clicking blocking)
+  time start_active;      // for calculation of active time
 
   public:
   
   Push_Button(size_t x, size_t y, size_t pos_x, 
-              size_t pos_y, time total_active_time = 1 sec) // based on pixels
+              size_t pos_y, time total_active_time = 1 sec); // based on pixels
   Push_Button(float x, float y, float pos_x, 
-              float pos_y, time total_actv_time = 1 sec) // based on percentages
+              float pos_y, time total_actv_time = 1 sec); // based on percentages
 
   bool is_clicked(int x, int y) // check if coordinates in rectangle
   void activate() // if not active already 
@@ -116,6 +122,8 @@ class Push_Button {
   
   //update? // deactivate based on time
   void draw(sf::RenderWindow& window); // draw to window and do update step?
+
+  friend GUI;
 
 };
 
@@ -145,7 +153,7 @@ bool Push_Button::get_state() {
 }
 
 void Push_Button::draw(sf::RenderWindow& window) {
-  if(now - start_active > total_active_time) {
+  if(/*now - start_active > total_active_time*/) {
     button_.setFillColor(deactive_color_);
   }
   window.draw(button_);
@@ -153,20 +161,94 @@ void Push_Button::draw(sf::RenderWindow& window) {
 }
 
 
+class Text_Display {
+
+  sf::RectangleShape background_;
+  sf::Text text_;
+
+public:
+
+  void draw(sf::RenderWindow&);
+
+  void set_text(std::string);
+  
+  // TO DO : as_string, as_int, ... functions (return text string as designated type)
+
+};
+
+/*
+class Scrolling_Bar {
+
+};
+*/
+
 // Do I want this?
 class GUI {
 
-  std::vector<Toggle_Button> toggle_buttons_;
+  sf::Font font_;
+
+  std::vector<sf::RectangleShape> backgrounds_;
+
+  std::vector<Text_Display> text_displays_;
+
+  std::vector<Toggle_Button> toggle_buttons_; // TO DO : Use unique ptr?
   std::vector<Push_Button> push_buttons_;
 
   public:
+
+  GUI();
+
+  void draw(sf::RenderWindow& window) {
+    for(auto& back : backgrounds_) window.draw(back);
+    for(auto& text : text_displays_) text.draw(window);
+    for(auto& button : toggle_buttons_) button.draw(window);
+    for(auto& button : push_buttons_) button.draw(window); 
+  }
 
   void click(int x, int y);
   std::map<std::string, bool> get_state(); // map from button name to bool state
                                            // (true - active, false - inactive)
 
+  void build_background(sf::RectangleShape rect, sf::RectangleShape... rects); // TO DO : move?
+
+  void add_text(const Text_Display& text);
+
+  void add_toggle_button(const Toggle_Button& toggle); // TO DO : Like above?? move?
+  void add_push_button(const Push_Button& push);
+
 };
 
+void GUI::click(int x, int y) {
+  for(auto& button : toggle_buttons_) {
+    if(button.is_clicked(x, y)) button.get_state() ? button.deactivate() : button.activate();
+  }
+  for(auto& button : push_buttons_) {
+    if(button.is_clicked(x, y)) button.activate();
+  }
+}
+
+// TO DO : Error if buttons have same label..
+std::map<std::string, bool> GUI::get_state() {
+  std::map<std::string, bool> ret;
+  for(auto& button : toggle_buttons) {
+    ret[button.label_.getString()] = button.get_state();
+  }
+  for(auto& button : push_buttons) {
+    ret[button.label_.getString()] = button.get_state();
+  }
+  return ret;
+}
+
+void GUI::build_background(sf::RectangleShape rect, sf::RectangleShape... rects) {
+  backgrounds_.push_back(rect);
+  build_background(rects);
+}
+
+void GUI::add_text(const Text_Display& text) { text_displays_.push_back(text); }
+
+void GUI::add_toggle_button(const Toggle_Button& toggle) { toggle_buttons_.push_back(toggle); }
+
+void GUI::add_push_button(const Push_Button& push) { push_buttons_.push_back(push); }
 
 int main() {
 

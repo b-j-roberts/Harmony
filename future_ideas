@@ -1,6 +1,5 @@
 container holding types ? Has iterator that can loop through and obtain types
   to be used in some other app ?
-arbitrarily large integer
 
 terrain and height maps :
   perlin
