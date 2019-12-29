@@ -385,6 +385,14 @@ std::map<std::string, bool> GUI::get_state() {
   return ret;
 }
 
+// Going Forward : 
+//   Create how I want user to interface with it (read only , except click and add button?)
+//   Create gui thread
+//   add colors
+//   fonts
+//   time on push button
+//   scroll bar
+//   ...
 
 int main() {
 

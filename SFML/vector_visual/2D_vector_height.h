@@ -6,6 +6,7 @@
 // TO DO : Check from outside range values?
 // TO DO : Resolution drawing ( only draws blocks every designated size and colors whole space
 //                              based on top left value )
+// TO DO : Fix issue with using with double instead of float vector
 
 // Polymorphic shader class
 class Shader {

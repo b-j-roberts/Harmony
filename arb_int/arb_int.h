@@ -299,7 +299,7 @@ Integer& Integer::operator--() {
 Integer Integer::operator--(int) {
   Integer temp = *this;
   --*this;
-  return *this;
+  return temp;
 }
 
 const Integer operator+(const Integer& lhs, const Integer& rhs) {
@@ -343,4 +343,5 @@ bool operator>=(const Integer& lhs, const Integer& rhs) {
 std::ostream& operator<< (std::ostream& os, const Integer& s) {
   if(s.negative_) os << "-";
   for(int i = s.number_.size() - 1; i != -1; --i) os << unsigned(s.number_[i]);
+  return os;
 }

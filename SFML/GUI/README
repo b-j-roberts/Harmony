@@ -1,0 +1,88 @@
+Interface
+---------
+
+in main :
+ 
+  Initialize GUI : 
+
+    GUI gui; (default font location?)
+      or
+    GUI gui(font location);
+  
+  Build up GUI : 
+
+    Add Background :
+    gui.addbackground(comma seperated list of sf::RectangleShape's representing background)
+      Note : Must set shapes position and size before putting in (also color)
+      Think about : Make a setbackgroundcolor which will allow user to set all background rects 
+                    to the same passed color
+                    Make it possible to set active and deactive colors too?
+
+    Add Text :
+    gui.addtextdisplay(commma seperated list of Text_Display Objects holding non button text)
+
+    Add Buttons :
+    gui.addpushbutton(comma seperated list of Push_Button Objects to add to gui)
+    gui.addtogglebutton(comma seperated list of Toggle_Button Objects to add to gui)
+
+    Add Other :
+    gui.addscrollingbar(csl of Scrolling_Bar objects) Note : This is not made
+
+  In "Game Loop" :
+ 
+    Click on GUI :
+    get mouse position if clicked
+    gui.click(mouse position)
+    ex :
+    if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+      sf::Vector2i position = sf::Mouse::getPosition(window);
+      gui.click(position.x, position.y);
+    } 
+
+    Get GUI state ( values of buttons and things ) :
+    gui.getstate();
+    Note : Returns map of string name to button/wheel specified to true / false / misc value it holds
+    Think about : Issue if buttons have same label
+    
+    Display GUI :
+    gui.draw(window)
+
+
+Text_Display :
+  Text_Display text(width, height, posx, posy, text string) // Creates it
+  Think about : way to change text for things like variable displays
+
+Push_Button :
+  Push_Button button(width, height, posx, posy, label)
+  Note : only want the state of this to be true for one check, but still be active for time interval
+  Think about : using get_state() to set state to false & only deactivate if time and false
+
+Toggle_Button : 
+  Toggle_Button button(width, height, posx, posy, label)
+  Note : Toggles on and off with each press
+
+  Think about : Way to set the active and deactive colors of each button individually before placing
+                into gui
+
+
+All Interface actions :
+
+  1st : Constructing GUI object launches the gui's thread, which is used to make the gui run smoothly
+        even when caller isnt
+        NOTE : Do I want an event loop in the gui thread? 
+        each loop of gui thread will :
+          update push_buttons : these will individually lock when being updated
+                                  think about ordered_lock so that we wont get stuck updating
+
+  Draw : called by main, this is a read only from gui so thread safe ( maybe lock so that colors 
+           wont be changing )
+
+  click : this is not read only bc if click is on a button then it will activate, ...
+          locks mutex and processes click, called by main (unless deciding to do event loop)
+
+  get_state() : called by main, this is read only but I will lock thread so that state is locked
+                while we read all of it
+
+  adds : this should all be done at the beginning before drawing, clicks, and get so no need to lock
+
+  
