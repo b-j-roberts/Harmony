@@ -69,7 +69,6 @@ All Interface actions :
 
   1st : Constructing GUI object launches the gui's thread, which is used to make the gui run smoothly
         even when caller isnt
-        NOTE : Do I want an event loop in the gui thread? 
         each loop of gui thread will :
           update push_buttons : these will individually lock when being updated
                                   think about ordered_lock so that we wont get stuck updating

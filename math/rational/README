@@ -1,0 +1,59 @@
+***********************************************************
+*
+*
+*  C++ Rational Numbers by Brandon Roberts
+*  Version 1.00 Update : Realese!
+*
+*
+***********************************************************
+
+** Contains **
+--------------
+Harmony/rational/rational.h
+
+
+** Ideas **
+-----------
+
+Add unsigned int version to increase number of possible numbers (this will decrease efficiency on
+  adding and subtracting numbers of different & opposite signs respectively)
+
+Add an arb int version (wont have inefficieny above because arb int can be negative)
+
+Others in TO DO list
+
+
+** Dependancies **
+------------------
+None
+
+
+** Compiling **
+---------------
+If included in main.cpp:
+  g++ -c main.cpp
+  g++ main.o -o main.cpp
+
+i.e. Normal
+
+
+** READ **
+----------
+
+This is a class for Rational number ( whos numerator and denominator are stored as int, but kept 
+  positive after reduce() )
+
+The number will be reduced after any calculation, so there is never worry of having an unreduced num
+
+
+** Interface **
+---------------
+
+Construction :
+  Rational() - sets value as 0 / 1
+  Rational(numerator, denominator = 1) - sets value as numberator / denominator (default to 1)
+
+operators allowed : ++ (pre and post), -- (pre and post) - these increment by 1
+                    += , -=, *=, /=, +, -, *, /
+                    ==, !=, <, <=, >, >=
+                    <<

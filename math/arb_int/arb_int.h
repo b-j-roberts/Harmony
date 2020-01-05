@@ -1,8 +1,8 @@
 #include <vector>
-#include <map>
+#include <map> // for carry bytes
 #include <string>
 
-#include <cstdint>
+#include <cstdint> // TO DO : Is this needed?
 #include <stdexcept>
 
 #include <ostream>
