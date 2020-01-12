@@ -84,4 +84,7 @@ All Interface actions :
 
   adds : this should all be done at the beginning before drawing, clicks, and get so no need to lock
 
-  
+ g++ gui_threaded.o -o gui_threaded $SFML -lX11 -pthread
+ 
+TO DO : Future idea : Make XML based gui interface
+                      so one would just use GUI gui("xml file location"); this would make gui layout

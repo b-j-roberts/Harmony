@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <X11/Xlib.h> // XInitThreads
 
 #include <vector>
 #include <map>
@@ -6,6 +7,7 @@
 
 #include <thread>
 #include <mutex>
+#include <functional> // cref
 
 #include <iostream> // TO DO
 
@@ -29,13 +31,28 @@ sf::Vector2f center_pos_TL(sf::FloatRect out, sf::FloatRect in) {
 class Toggle_Button {
   
   sf::RectangleShape button_;
-  sf::Font font; // TO DO : Move to gui and use reference
   sf::Text label_;
 
   bool state_;
 
   sf::Color active_color_;
   sf::Color deactive_color_;
+
+  void GUI_sizing(const sf::Font& font) {
+
+    label_.setFont(font);
+
+    sf::Vector2f size = button_.getSize();
+
+    size_t max_char_width = (float)size.x / (float)label_.getString().getSize(); // TO DO : Letter Spacing?
+    // TO DO : Check new line characters for max_char_height? // TO DO : Line spacing?
+    label_.setCharacterSize(max_char_width < size.y ? max_char_width : size.y);
+
+    label_.setPosition(center_pos_TL(button_.getGlobalBounds(), label_.getGlobalBounds()));
+    sf::Vector2f shift = sf::Vector2f(label_.getPosition().x - label_.getGlobalBounds().left,
+                                    label_.getPosition().y - label_.getGlobalBounds().top);
+    label_.setPosition(label_.getPosition() + shift);
+  }
 
   public:
 
@@ -68,19 +85,14 @@ Toggle_Button::Toggle_Button(size_t width, size_t height,
 
   button_.setSize(sf::Vector2f(width, height));
   button_.setPosition(sf::Vector2f(pos_x, pos_y));
-  button_.setFillColor(active_color_);
+  button_.setFillColor(deactive_color_);
   //button_.setOutlineColor(sf::Color(10, 10, 10));
   //button_.setOutlineThickness(3);
 
-  // TEMP
-  if(!font.loadFromFile("/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf")) {
-    throw std::runtime_error("No font file :""/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf"
-                             " found!");
-  }
-  label_.setFont(font);
+  //label_.setFont(font);
   label_.setString(label);
   label_.setFillColor(sf::Color::Black);
-
+/*
   size_t max_char_width = (float)width / (float)label.length(); // TO DO : Letter Spacing?
   // TO DO : Check new line characters for max_char_height? // TO DO : Line spacing?
   label_.setCharacterSize(max_char_width < height ? max_char_width : height);
@@ -89,7 +101,7 @@ Toggle_Button::Toggle_Button(size_t width, size_t height,
   sf::Vector2f shift = sf::Vector2f(label_.getPosition().x - label_.getGlobalBounds().left, 
                                     label_.getPosition().y - label_.getGlobalBounds().top);
   label_.setPosition(label_.getPosition() + shift);
-
+*/
   state_ = false;
 }
 
@@ -111,13 +123,13 @@ bool Toggle_Button::get_state() { return state_; }
 
 void Toggle_Button::draw(sf::RenderWindow& window) const {
   window.draw(button_);
-
+/*
   auto rect = label_.getGlobalBounds();
   auto d_rect = sf::RectangleShape(sf::Vector2f(rect.width, rect.height));
   d_rect.setPosition(sf::Vector2f(rect.left, rect.top));
   d_rect.setFillColor(sf::Color::Blue);
   window.draw(d_rect);
-
+*/
   window.draw(label_);
 }
 
@@ -125,7 +137,6 @@ void Toggle_Button::draw(sf::RenderWindow& window) const {
 class Push_Button {
 
   sf::RectangleShape button_;
-  sf::Font font; // TO DO
   sf::Text label_;
 
   bool state_;
@@ -135,6 +146,23 @@ class Push_Button {
 
   //time total_active_time; //(animation and clicking blocking)
   //time start_active;      // for calculation of active time
+
+
+  void GUI_sizing(const sf::Font& font) {
+
+    label_.setFont(font);
+
+    sf::Vector2f size = button_.getSize();
+
+    size_t max_char_width = (float)size.x / (float)label_.getString().getSize(); // TO DO : Letter Spacing?
+    // TO DO : Check new line characters for max_char_height? // TO DO : Line spacing?
+    label_.setCharacterSize(max_char_width < size.y ? max_char_width : size.y);
+
+    label_.setPosition(center_pos_TL(button_.getGlobalBounds(), label_.getGlobalBounds()));
+    sf::Vector2f shift = sf::Vector2f(label_.getPosition().x - label_.getGlobalBounds().left,
+                                    label_.getPosition().y - label_.getGlobalBounds().top);
+    label_.setPosition(label_.getPosition() + shift);
+  }
 
   public:
   
@@ -151,7 +179,7 @@ class Push_Button {
   bool get_state(); // get state (set to false after this is called once
   
   void update(); // deactivate based on time
-  void draw(sf::RenderWindow& window) const; // draw to window and do update step?
+  void draw(sf::RenderWindow&) const; // draw to window and do update step?
 
   friend GUI;
 
@@ -171,17 +199,12 @@ Push_Button::Push_Button(size_t width, size_t height, size_t pos_x, size_t pos_y
 
   button_.setSize(sf::Vector2f(width, height));
   button_.setPosition(sf::Vector2f(pos_x, pos_y));
-  button_.setFillColor(active_color_);
+  button_.setFillColor(deactive_color_);
 
-  //TEMP
-  if(!font.loadFromFile("/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf")) {
-    throw std::runtime_error("No font file :""/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf"
-                             " found!");
-  }
-  label_.setFont(font);
+  //label_.setFont(font);
   label_.setString(label);
   label_.setFillColor(sf::Color::Black);
-
+/*
   size_t max_char_width = (float)width / (float)label.length(); // TO DO : Letter Spacing?
   // TO DO : Check new line characters for max_char_height? // TO DO : Line spacing?
   label_.setCharacterSize(max_char_width < height ? max_char_width : height);
@@ -190,7 +213,7 @@ Push_Button::Push_Button(size_t width, size_t height, size_t pos_x, size_t pos_y
   sf::Vector2f shift = sf::Vector2f(label_.getPosition().x - label_.getGlobalBounds().left, 
                                     label_.getPosition().y - label_.getGlobalBounds().top);
   label_.setPosition(label_.getPosition() + shift);
-
+*/
   state_ = false;
 }
 
@@ -241,6 +264,22 @@ class Text_Display {
   sf::RectangleShape background_;
   sf::Text text_;
 
+  // TO DO : Fix & move?
+  // setup size, position, and font after getting font from gui
+  void GUI_sizing(const sf::Font& font) {
+    text_.setFont(font);
+
+    sf::Vector2f size = background_.getSize();
+    
+    size_t max_char_width = size.x / text_.getString().getSize();
+    text_.setCharacterSize(max_char_width < size.y ? max_char_width : size.y);
+
+    text_.setPosition(center_pos_TL(background_.getGlobalBounds(), text_.getGlobalBounds()));
+    sf::Vector2f shift = sf::Vector2f(text_.getPosition().x - text_.getGlobalBounds().left,
+                                    text_.getPosition().y - text_.getGlobalBounds().top);
+    text_.setPosition(text_.getPosition() + shift);
+  }
+
 public:
 
   Text_Display(size_t, size_t, size_t, size_t, std::string);
@@ -265,18 +304,8 @@ Text_Display::Text_Display(size_t width, size_t height, size_t pos_x,
   background_.setPosition(sf::Vector2f(pos_x, pos_y));
   background_.setFillColor(sf::Color(255, 255, 255)); // TO DO : TEMP
 
-
   text_.setString(text);
   text_.setFillColor(sf::Color::Black);
-
-  size_t max_char_width = (float)width / (float)text.length(); // TO DO : Letter Spacing?
-  // TO DO : Check new line characters for max_char_height? // TO DO : Line spacing?
-  text_.setCharacterSize(max_char_width < height ? max_char_width : height);
-
-  sf::Vector2f top_shift = sf::Vector2f(0, height - text_.getGlobalBounds().height);
-  text_.setPosition(center_pos_TL(background_.getGlobalBounds(), 
-                    text_.getGlobalBounds()) - top_shift);
-
 }
 
 void Text_Display::draw(sf::RenderWindow& window) const {
@@ -308,7 +337,7 @@ class drop_down {
 class GUI {
 
   std::thread gui_thread_;
-  std::mutex lock_;
+  //std::mutex lock_;
 
   bool new_state_;
   std::map<std::string, bool> state_; // map from button name to bool state of button
@@ -323,36 +352,49 @@ class GUI {
   std::vector<Toggle_Button> toggle_buttons_; // TO DO : Use unique ptr?
   std::vector<Push_Button> push_buttons_;
 
-  void GUI_Loop() {
-    if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-      sf::Vector2f position = sf::Mouse::getPosition(window);
-      for(auto& button : toggle_buttons_) {
-        if(button.is_clicked(position.x, position.y)) {
-          button.get_state() ? button.deactivate() : button.activate();
-          new_state_ = true;
-        } 
-      }
-      for(auto& button : push_buttons_) {
-        if(button.is_clicked(position.x, position.y)) {
-          button.activate();
-          new_state_ = true;
+  void GUI_Loop(sf::RenderWindow& window) {
+    while(window.isOpen()) {
+      if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+        sf::Vector2i position = sf::Mouse::getPosition(window);
+        for(auto& button : toggle_buttons_) {
+          if(button.is_clicked(position.x, position.y)) {
+            button.get_state() ? button.deactivate() : button.activate();
+            new_state_ = true;
+          } 
         }
-      }
+        for(auto& button : push_buttons_) {
+          if(button.is_clicked(position.x, position.y)) {
+            button.activate();
+            new_state_ = true;
+          }
+        }
       // TO DO : Disable clicks for x time
+      }
+
+      for(auto& button : push_buttons_) { button.update(); /* TO DO : set new state if changed ? */}
     }
-    for(auto& button : push_buttons_) { button.update(); }
-    if(new_state_) { update_state(); }
   }
 
   public:
 
-  GUI(const sf::RenderWindow& window):
-    gui_thread_(GUI_Loop()),
+  GUI(const GUI&) = delete;
+  GUI& operator=(const GUI&) = delete;
+
+  GUI(sf::RenderWindow& window):
     new_state_(true) {
+
+    gui_thread_ = std::thread(&GUI::GUI_Loop, this, std::ref(window));
+    
     if(!font_.loadFromFile("/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf")) {
       throw std::runtime_error("No font file :""/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf"
                                " found!");
     }
+
+  }
+
+  ~GUI() {
+    gui_thread_.join();
+    // TO DO
   }
 
   void draw(sf::RenderWindow& window) const {
@@ -366,51 +408,47 @@ class GUI {
 
   // Add Parts of GUI ( background , text display , push & toggle buttons )
 
-  void add_background(const sf::RectangleShape& rect) { // TO DO : Move? and std::move?
-    backgrounds_.push_back(rect);
+  // TO DO : Check move and such
+  template<typename... Args>
+  void add_background(Args&&... args) {
+    (void)std::initializer_list<int>{ (backgrounds_.emplace_back(args), 0)... };
+  }
+
+/*	
+template<class F, class...Args>
+F for_each_arg(F f, Args&&...args) {
+  (f(std::forward<Args>(args)),...);
+  return f;
+}*/
+
+  template<class F, class...Args>
+  void for_each_arg(F f, Args&&...args) {
+    (void)std::initializer_list<int>{ (f(std::forward<Args>(args)), 0)... };
+  }
+
+// TO DO : Prevent other object calls
+  template<typename... Args>
+  void add_text(Args&&... args) {
+    auto set_stuff = [&](Text_Display& t) { t.GUI_sizing(font_); };
+    for_each_arg(set_stuff, args...);
+    (void)std::initializer_list<int>{ (text_displays_.emplace_back(args), 0)... };
+  }
+
+
+  template<typename... Args>
+  void add_toggle_button(Args&&... args) {
+    auto set_stuff = [&](Toggle_Button& t){ t.GUI_sizing(font_);};
+    for_each_arg(set_stuff, args...);
+    (void)std::initializer_list<int>{ (toggle_buttons_.emplace_back(args), 0)... };
+    new_state_ = true;
   }
 
   template<typename... Args>
-  void add_background(const sf::RectangleShape& rect, Args... args) {
-    backgrounds_.push_back(rect);
-    add_background(args...);
-  }
-
-  void add_text(const Text_Display& text) { // TO DO : move?
-    text_displays_.push_back(text); 
-  }
-
-  // TO DO : Change these to variadic functions instead of templates?
-  template<typename... Args> // const &?
-  void add_text(const Text_Display& text, Args... args) { // TO DO : move?
-    // TO DO : set font to be gui font
-    text_displays_.push_back(text); 
-    add_text(args...);
-  }
-
-
-  void add_toggle_button(const Toggle_Button& toggle) { // TO DO : move?
-    toggle_buttons_.push_back(toggle); 
+  void add_push_button(Args&&... args) {
+    auto set_stuff = [&](Push_Button& t){ t.GUI_sizing(font_); };
+    for_each_arg(set_stuff, args...);
+    (void)std::initializer_list<int>{ (push_buttons_.emplace_back(args), 0)... };
     new_state_ = true;
-  }
-
-  template<typename... Args> // const &?
-  void add_toggle_button(const Toggle_Button& toggle, Args... args) { // TO DO : move?
-    toggle_buttons_.push_back(toggle); 
-    new_state_ = true;
-    add_toggle_button(args...);
-  }
-
-  void add_push_button(const Push_Button& push) { // TO DO : move?
-    push_buttons_.push_back(push); 
-    new_state_ = true;
-  }
-
-  template<typename... Args> // const &?
-  void add_push_button(const Push_Button& push, Args... args) { // TO DO : move?
-    push_buttons_.push_back(push); 
-    new_state_ = true;
-    add_push_button(args...);
   }
 
 };
@@ -444,6 +482,8 @@ const std::map<std::string, bool>& GUI::get_state() {
 
 int main() {
 
+  XInitThreads();
+
   sf::VideoMode desktop = sf::VideoMode().getDesktopMode();
   sf::RenderWindow window(desktop, "GUI Test");
   window.setFramerateLimit(30);
@@ -466,6 +506,10 @@ int main() {
   Push_Button push_1(100, 180, 1020, 20, "Push1");
   Push_Button push_2(200, 240, 1090, 90, "Push2");
   gui.add_push_button(push_1, push_2);
+
+  Text_Display t1(100, 200, 0, 0, "1");
+  Text_Display t2(100, 200, 300, 0, "2");
+  gui.add_text(t1, t2);
 
   sf::Event event;
 

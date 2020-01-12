@@ -11,6 +11,7 @@
 // TO DO : Think about displaying level printed at
 // TO DO : Check if you can use Log_Level::WARN (example) syntax
 // TO DO : Change copy construct streamable object template?
+// TO DO : Add verbose mode
 
 enum Log_Level { FATAL = 0, WARN = 1, INFO = 2, DEBUG = 3 }; 
 
