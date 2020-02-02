@@ -1,90 +1,100 @@
-Interface
----------
+***********************************************************
+*
+*
+*  C++ SFML Based GUI by Brandon Roberts
+*  Version 1.00 Update : Realese!
+*
+*
+***********************************************************
 
-in main :
- 
-  Initialize GUI : 
+** Contains **
+--------------
+Harmony/SFML/GUI/gui.h
 
-    GUI gui; (default font location?)
-      or
-    GUI gui(font location);
+
+** Idead **
+-----------
+Listed as TO DO in code
+More color schemes
+
+
+** Issues **
+------------
+Listed as TO DO in code
+
+
+** Dependancies **
+------------------
+SFML
+X11 (Xinitthreads)
+
+
+** Compiling **
+---------------
+If included in main.cpp:
+  - main.cpp must have `XInitThreads();` before initializing GUI object
+  g++ -c main.cpp -std=c++1z
+  g++ main.o -o main $SFML -pthread -lX11
+
+i.e. us SFML alias made in .bashrc
+
+
+** READ **
+-----------
+
+This is an SFML based gui that allows the dealing of clicks and updating button states in its own
+  thread. Allows easy interface for creating a GUI & coloring it ( making it match )
+
+
+** Interface **
+---------------
+
+NOTE : Must include line `XInitThreads();` in int main() before calling GUI constructor
+
+GUI Construction :
+  GUI gui_name(const sf::RenderWindow&, sf::Font=default font);
+
+GUI Elements Creating :
   
-  Build up GUI : 
+  Background :
+    Background background_name(size_x, size_y, pos_x, pos_y (from top left), sf::Color = default)
 
-    Add Background :
-    gui.addbackground(comma seperated list of sf::RectangleShape's representing background)
-      Note : Must set shapes position and size before putting in (also color)
-      Think about : Make a setbackgroundcolor which will allow user to set all background rects 
-                    to the same passed color
-                    Make it possible to set active and deactive colors too?
+  Text Display :
+    Text_Display text_display_name(size_x, size_y, pos_x, pos_y (from top left), string label,
+                                   sf::Color = default background color)
 
-    Add Text :
-    gui.addtextdisplay(commma seperated list of Text_Display Objects holding non button text)
+  Toggle Button : ( ie a button that toggles state each time clicked )
+    Toggle_Button toggle_button_name(size_x, size_y, pos_x, pos_y (from top left), sting label,
+                                     sf::Color active = default, sf::Color deactive = default)
 
-    Add Buttons :
-    gui.addpushbutton(comma seperated list of Push_Button Objects to add to gui)
-    gui.addtogglebutton(comma seperated list of Toggle_Button Objects to add to gui)
+  Push Button : ( ie a button that gives true state each time clicked, only after click duration )
+    Push_Button push_button_name(size_x, size_y, pos_x, pos_y (from top left), sting label,
+                                 sf::Color active = default, sf::Color deactive = default)
 
-    Add Other :
-    gui.addscrollingbar(csl of Scrolling_Bar objects) Note : This is not made
+GUI Interface :
+  
+  ADD elements :
+    Backgrounds :    gui_name.add_background(background_name_1, background_name_2, ...);
+    Text Displays :  gui_name.add_text(text_display_name_1, text_display_name_2, ...);
+    Toggle Buttons : gui_name.add_toggle_button(toggle_button_name_1, toggle_button_2, ...); 
+    Push Buttons :   gui_name.add_push_button(push_button_name_1, push_button_name_2);
 
-  In "Game Loop" :
- 
-    Click on GUI :
-    get mouse position if clicked
-    gui.click(mouse position)
-    ex :
-    if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
-      sf::Vector2i position = sf::Mouse::getPosition(window);
-      gui.click(position.x, position.y);
-    } 
+  Coloring GUI :
+    Backgrounds (including Text Display's background) :
+      gui_name.set_background_color(sf::Color Background color, sf::Color Text_Display back color);
+      gui_name.set_background_color(sf::Color Background color & Text_Display back color);
 
-    Get GUI state ( values of buttons and things ) :
-    gui.getstate();
-    Note : Returns map of string name to button/wheel specified to true / false / misc value it holds
-    Think about : Issue if buttons have same label
+    Text Color : gui_name.set_text_color(sf::Color);
     
-    Display GUI :
-    gui.draw(window)
+    Button Colors :
+      gui_name.set_button_color(sf::Color active color, sf::Color deactive color);
+      gui_name.set_button_color(std::pair<sf::Color, sf::Color> active-deactive color pair);
 
+    All Colors in one : gui_name.set_color_scheme(const GUI_Scheme&);
 
-Text_Display :
-  Text_Display text(width, height, posx, posy, text string) // Creates it
-  Think about : way to change text for things like variable displays
-
-Push_Button :
-  Push_Button button(width, height, posx, posy, label)
-  Note : only want the state of this to be true for one check, but still be active for time interval
-  Think about : using get_state() to set state to false & only deactivate if time and false
-
-Toggle_Button : 
-  Toggle_Button button(width, height, posx, posy, label)
-  Note : Toggles on and off with each press
-
-  Think about : Way to set the active and deactive colors of each button individually before placing
-                into gui
-
-
-All Interface actions :
-
-  1st : Constructing GUI object launches the gui's thread, which is used to make the gui run smoothly
-        even when caller isnt
-        each loop of gui thread will :
-          update push_buttons : these will individually lock when being updated
-                                  think about ordered_lock so that we wont get stuck updating
-
-  Draw : called by main, this is a read only from gui so thread safe ( maybe lock so that colors 
-           wont be changing )
-
-  click : this is not read only bc if click is on a button then it will activate, ...
-          locks mutex and processes click, called by main (unless deciding to do event loop)
-
-  get_state() : called by main, this is read only but I will lock thread so that state is locked
-                while we read all of it
-
-  adds : this should all be done at the beginning before drawing, clicks, and get so no need to lock
-
- g++ gui_threaded.o -o gui_threaded $SFML -lX11 -pthread
- 
-TO DO : Future idea : Make XML based gui interface
-                      so one would just use GUI gui("xml file location"); this would make gui layout
+  Other essentials :
+  
+    DRAW : gui_name.draw(sf::RenderWindow&); - draws GUI Elements to window
+    STATE : gui_name.get_state(); - invalidates past maps returned from calls to this function
+      - TO USE STATE MAP : gui_state_map_returned[gui_element_name()] - true/false based on state
+                           gui_state_map_returned[gui_element_name.id()] - t/f based on state
