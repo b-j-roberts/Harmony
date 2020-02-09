@@ -37,6 +37,11 @@
 NOTE : Each project has its own README that explains how to use and the implemetation 
        for the specific header files
 
+** TO DO **
+-----------
+Make into cpp & headers? ( make into actual library )
+Namespaces
+
 ** Issues **
 ------------
 

@@ -2,7 +2,7 @@
 *
 *
 *  Python-esk Argument Parser by Brandon Roberts
-*  Version 1.00 Update : Template Parser Release
+*  Version 1.1 Update : Major Rework / Cleanup - C++17-ish
 *
 *
 ***********************************************************
@@ -14,11 +14,7 @@ Harmony/arg_parser/template_version/arg_parser.h
 
 ** Issues **
 ------------
-Listed as TO DO in code:
-  namespaces
-  access argument descriptions outside help
-  forcing '-' and '--' criterion
-  Issue if name and id flags given in call
+Listed as 'TO DO' in code
 
 
 ** Dependencies **
@@ -29,10 +25,14 @@ boost/lexical_cast.hpp - for lexical_cast
 ** Compiling **
 ---------------
 if included in main.cpp:
-  g++ -c main.cpp
+
+  g++ -c main.cpp -I ~/workspace -std=c++1z
   g++ main.o -o main
 
-ie. Normal
+  clang++ -c main.cpp -I ~/workspace -std=c++1z
+  clang++ main.o -o main
+
+ie. C++17
 
 
 ** READ **
@@ -44,32 +44,34 @@ General argument parser, inspired by the arg_parser in python ( so has very simi
 ** Interface **
 ---------------
 
-Construction : 
-    Parser parser_name(int argc, char** argv)
-    Parser parser_name(int argc, char** argv, string desc)
-    -- argc = argument count , argv = argument array , desc = parser description
+Parser Object :
 
-To add arguments : 
-    add_argument<type>(string id, string name, string desc, bool req)
-    -- type = argument type , id = id flag of arg , name = name flag of arg ,
-       req = if argument is required (defaults to false)
+  Construction : 
+      Parser parser_name(int argc, char** argv, const std::string& description = "")
+      -- argc = argument count , argv = argument array , desc = parser description (for help string)
 
-To get argument : 
-    get<type>(name)
-    -- type = arguments type from add_argument , name = name given in add_argument
+  To add arguments : 
+      add_argument<type>(string id, string name, string description, bool required = false)
+      -- type = argument value type , id = id flag of arg (-), name = name flag of arg (-- & index),
+         req = if argument is required
 
-Check if has arg : 
-    has(name)
-    -- name = name given in add_argument
-    NOTE : Returns true if argument was passed in and argument was in add_argument
+  Check if has argument for passed name : 
+      has(string name)
+      -- name = name given in add_argument
+      NOTE : Returns true if argument was passed in and argument was in add_argument
+
+  To get argument : 
+      get<type>(string name)
+      -- type = arguments type from add_argument , name = name given in add_argument
 
 
-Example :
+** Example **
+-------------
 
   main.cpp {
 
-    #include "arg_parser.h"
-    ...
+    #include "Harmony/arg_parser/template_version/arg_parser.h"
+    #include <iostream> // cout
 
     int main(int argc, char** argv) {
 
@@ -77,14 +79,12 @@ Example :
  
       parser.add_argument<int>("-x", "--xtra", "This is the number of extras", true);
       parser.add_argument<double>("-p", "--perc", "This is the percent of people");
-      parser.add_argument<string>("-w", "--word", "This is their favorite word");
+      parser.add_argument<std::string>("-w", "--word", "This is their favorite word");
 
-      parser.parse();
-
-      cout << parser.get<int>("xtra");
+      std::cout << parser.get<int>("xtra") << '\n';
       if(parser.has("perc") && parser.has("word")) {
-        cout << parser.get<double>("perc");
-        cout << parser.get<string>("word");
+        std::cout << parser.get<double>("perc") << '\n';
+        std::cout << parser.get<std::string>("word") << '\n';
       }
 
       return 0;
@@ -93,7 +93,7 @@ Example :
 
   }
 
-  g++ -c main.cpp
+  g++ -c main.cpp -I ~/workspace -std=c++1z
   g++ main.o -o main
 
   ./main -p 0.13 // ERROR : No -x or --xtra flag, which is required
