@@ -2,7 +2,7 @@
 *
 *
 *  C++ SFML Based GUI by Brandon Roberts
-*  Version 1.00 Update : Realese!
+*  Version 1.1 Update : Cleaning , Linking, and default states
 *
 *
 ***********************************************************
@@ -12,7 +12,7 @@
 Harmony/SFML/GUI/gui.h
 
 
-** Idead **
+** Ideas **
 -----------
 Listed as TO DO in code
 More color schemes
@@ -21,6 +21,7 @@ More color schemes
 ** Issues **
 ------------
 Listed as TO DO in code
+Warnings generated for unused variables in structured binding
 
 
 ** Dependancies **
@@ -36,7 +37,7 @@ If included in main.cpp:
   g++ -c main.cpp -std=c++1z
   g++ main.o -o main $SFML -pthread -lX11
 
-i.e. us SFML alias made in .bashrc
+i.e. C++17 & use SFML alias made in .bashrc & thread & lX11
 
 
 ** READ **
@@ -51,25 +52,45 @@ This is an SFML based gui that allows the dealing of clicks and updating button 
 
 NOTE : Must include line `XInitThreads();` in int main() before calling GUI constructor
 
+Coloring :
+  
+  Default Active / Deactive button pairs :
+    Black_White
+    Halloween
+
+  GUI_Scheme :
+    NOTE : Has 5 fields for GUI Coloring : background_, text_background_, text_, 
+                                           button_active_, button_deactive_
+    Defaults :
+      Base_Scheme
+      Halloween_Scheme
+
 GUI Construction :
   GUI gui_name(const sf::RenderWindow&, sf::Font=default font);
 
 GUI Elements Creating :
   
   Background :
-    Background background_name(size_x, size_y, pos_x, pos_y (from top left), sf::Color = default)
+    Background(size_x, size_y, pos_x, pos_y (from top left), sf::Color = Base)
 
   Text Display :
-    Text_Display text_display_name(size_x, size_y, pos_x, pos_y (from top left), string label,
-                                   sf::Color = default background color)
+    Text_Display(size_x, size_y, pos_x, pos_y (from top left), string label, sf::Color = Base)
 
   Toggle Button : ( ie a button that toggles state each time clicked )
-    Toggle_Button toggle_button_name(size_x, size_y, pos_x, pos_y (from top left), sting label,
-                                     sf::Color active = default, sf::Color deactive = default)
+    Toggle_Button(size_x, size_y, pos_x, pos_y (from top left), sting label, begin_state = false,
+                  sf::Color active = default, sf::Color deactive = default)
+    Toggle_Button(size_x, size_y, pos_x, pos_y (from top left), sting label,
+                  sf::Color active, sf::Color deactive)
+    Toggle_Button(size_x, size_y, pos_x, pos_y (from top left), sting label, begin_state,
+                  pair<sf::Color, sf::Color> active_deactive_pair)
+    Toggle_Button(size_x, size_y, pos_x, pos_y (from top left), sting label,
+                  pair<sf::Color, sf::Color> active_deactive_pair)
 
   Push Button : ( ie a button that gives true state each time clicked, only after click duration )
-    Push_Button push_button_name(size_x, size_y, pos_x, pos_y (from top left), sting label,
-                                 sf::Color active = default, sf::Color deactive = default)
+    Push_Button(size_x, size_y, pos_x, pos_y (from top left), sting label,
+                sf::Color active = default, sf::Color deactive = default)
+    Push_Button(size_x, size_y, pos_x, pos_y (from top left), sting label,
+                pair<sf::Color, sf::Color> active_deactive_pair)
 
 GUI Interface :
   
@@ -78,6 +99,8 @@ GUI Interface :
     Text Displays :  gui_name.add_text(text_display_name_1, text_display_name_2, ...);
     Toggle Buttons : gui_name.add_toggle_button(toggle_button_name_1, toggle_button_2, ...); 
     Push Buttons :   gui_name.add_push_button(push_button_name_1, push_button_name_2);
+    Linked Toggle Buttons : gui_name.add_linked_toggle(toggle_name_1, toggle_name_2, ...);
+      ie toggle buttons that if one is activated all other linked deactivate
 
   Coloring GUI :
     Backgrounds (including Text Display's background) :
@@ -98,3 +121,6 @@ GUI Interface :
     STATE : gui_name.get_state(); - invalidates past maps returned from calls to this function
       - TO USE STATE MAP : gui_state_map_returned[gui_element_name()] - true/false based on state
                            gui_state_map_returned[gui_element_name.id()] - t/f based on state
+    Text :
+      std::string get_text(id) : returns the text inside a gui Text_Display w/ id
+      void set_text(id, std::string text) : sets text inside gui Text_Display ( & redos gui sizing )

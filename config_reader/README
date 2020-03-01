@@ -33,7 +33,7 @@ if included in main.cpp:
   clang++ -c main.cpp -I ~/workspace
   clang++ main.o -o main
 
-ie. Normal
+ie. C++11
 
 
 ** READ **

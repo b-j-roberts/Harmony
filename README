@@ -2,7 +2,7 @@
 *
 *
 *  Harmony C++ Library by Brandon Roberts
-*  Version 0.05 Update : Outside Code Info
+*  Version 0.1 Update : Cleaned Complete & Naming Convention
 *
 *
 ***********************************************************
@@ -13,48 +13,85 @@
 * Argument Parser - This is a argument parser object (python-esk) that will allow general 
                       command line argument parsing
                     Main object is : Parser
-                    FUTURE : as_* function version, so no templates
-  * arg_parser/template_version/arg_parser.h
+                    #include "Harmony/arg_parser/template_version/arg_parser.h"
 
 
 * Config File Reader - This is a config file reader that is able to read config file info into
                          a map and then allow access to these config parameters in code
                        2 Main objects are : Config_Reader & Parameter
+                       #include "Harmony/config_reader/config_reader.h"
 
 
 * Level Logger - This is a logger object that allows log levels, so that one can change the 
-                   types of messages that get logged to an exterior file
-                 Main object is : Logger
-                 FUTURE : add stream constructor that allows the user to choose stream object
-                   to write to ( so one can use cout stream and so on )
+                   types of messages that get logged to a ostream object
+                 Main object is : Logger & Log_Level ( enum )
+                 #include "Harmony/logger/logger.h"
 
 
-* Thread Pool - This is an implementation of a thread pool design structure using c++ thread objects.
-                Currently not completed : Need to learn more about threading first
-  *  thread-pool/threadQ.cpp - task queue implementation
+* Arbitrary Sized Integer - This is an integer that can be arbitrarily large ( takes 1byte per digit )
+                            Main object : Integer
+                            #include "Harmony/math/arb_int/arb_int.h"
 
+
+* Rational - This is a class for a rational number ( keeps track of numerator & denominator as int )
+             Main object : Rational
+             #include "Harmony/math/rational/rational.h"
+
+
+* 2D Vector Visualizor - This is a family of functions to display a 2D vector w/ different visualfx
+                         Main Functions : linear_Range_Shader, make_Or_Break ( both with variants )
+                         Objects : Shader, default Shaders ( Jet_Shaders & Mono_Shaders variants )
+                         #include "Harmony/sfml/vector_visual/2D_vector_height.h"
+
+
+* GUI SFML - This is a header containing all the needs to create and run a gui in a seperate thread
+             Main Objects : Gui, Background, Text_Display, Toggle_Button, Push_Button
+             #include "Harmony/sfml/gui/gui.h"
+
+* UNFINISHED - thread_pool
 
 NOTE : Each project has its own README that explains how to use and the implemetation 
        for the specific header files
 
+
 ** TO DO **
 -----------
-Make into cpp & headers? ( make into actual library )
+Make into cpp & headers? ( make into static library )
 Namespaces
+C++20
+
 
 ** Issues **
 ------------
-
 Issues in README's for specific projects
 Search : TO\ DO for list of fixes and issues
 
-Make into an actual library, rather than groups of header files
 
 ** Notes **
 -----------
 
 See file ./future_ideas for future ideas and things for this library
+
+All Header Files Compile Checked with :
+  g++ -c test.cpp -Wall -Wextra -Wpedantic -std=c++1z -Wno-unused-variable
+  ( -Wno-unused-variable : GUI structured bindings with unused key )
+  
+  clang++ -c test.cpp -Weverything -Wextra -Wpedantic -std=c++1z -Wno-c++98-c++11-c++14-compat -Wno-c++98-compat -Wno-padded -Wno-global-constructors -Wno-missing-prototypes -Wno-exit-time-destructors -Wno-format-nonliteral
+  ( -Wno-format-nonliteral : logger format string issue )
+  ( -Wno-exit-time-destructors : Arb int statics ONE and NEG_ONE require exit time destruction )
+  ( -Wno-global-constructors : GUI color pairs and schemes need namespace )
+  ( -Wno-missing-prototypes : 2D_vector_visual functions , is this really necessary? )
+  ( -Wno-c++98-c++11-c++14-compat -Wno-c++98-compat -Wno-padded : stupid warnings )
  
 Note things I recommend, or think here ...
 
-Note standard design patterns here (ie function name conventions, ... )
+  NAMING CONVENTIONS :
+    NOTE : These only apply to interface level things ( helpers dont count here )
+
+    Directory/Filenames : all lowercase, '_' to seperate words
+    
+    Classes : 1st letter of each word uppercase, '_' to seperate words
+    Member Variables : all lowercase, '_' to seperate words, '_' at end
+    Member Functions : all lowercase, '_' to sererate words
+    
+    Functions : 1st words lowercase, following w/ capital 1st letter, '_' to separate words

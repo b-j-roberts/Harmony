@@ -1,30 +1,35 @@
+#ifndef HARMONY_GUI_SFML_H
+#define HARMONY_GUI_SFML_H
+
 #include <SFML/Graphics.hpp>
 #include <X11/Xlib.h> // XInitThreads ( MUST BE DECLARED IN MAIN THREAD )
 
-#include <vector>
 #include <map>
+#include <vector>
 #include <string>
 #include <thread>
 
 #include <functional> // std::cref
 #include <chrono> // duration_cast, milliseconds, steady_clock 
-#include <utility> // pair
+#include <utility> // pair, forward, move
 #include <memory> // unique_ptr
 #include <type_traits> // enable_if, conjunction, is_same // TO DO : C++20 concepts
+#include <stdexcept> // runtime_error
 
 // TO DO : Make buttons into polymorphic class
 // TO DO : Make option to allow label to be displayed outside of button (select position?)
-// TO DO : Allow linking of toggle buttons in certain ways so activating one deactivates others?
 // TO DO : Make XML format reader
 // TO DO : Percent based size constuctors
-// TO DO : Namespaces for colors and other gui things
+// TO DO : Namespaces for colors, ... ( remove global constructors -Wglobal-constructors )
 // TO DO : Default label?
 // TO DO : Prevent holding?
 // TO DO : Font color in text display constructor
 // TO DO : Think about inheritance levels of impl classes & protection of functions and members
 // TO DO : Allow for setting all text to same ( minimum ) font
 // TO DO : Multiline text labels
-// TO DO : Default state (ie starting state_) other than false
+// TO DO : Allow selection of min & max # of active linked toggles
+// TO DO : Default state checking on linked toggles
+// TO DO : Locking buttons into states, or from being clicked
 
 /*
 TO DO : FUTURE GUI ELEMENTS :
@@ -33,30 +38,33 @@ drop_down
 Radio_Button
 */
 
-class GUI; // Forward Declaration
+class Gui; // Forward Declaration
+
+// COLORING
 
 // Premade Button Color Pairs - pair(active, deactive)
-auto Black_White = std::make_pair(sf::Color::White, sf::Color::Black); 
-auto Halloween   = std::make_pair(sf::Color(235, 97, 35), sf::Color::Black);
+const auto Black_White = std::make_pair(sf::Color::White, sf::Color::Black); 
+const auto Halloween   = std::make_pair(sf::Color(235, 97, 35), sf::Color::Black);
 
 
 // GUI Color Schemes
-struct GUI_Scheme {
-
+struct Gui_Scheme {
   sf::Color background_;
   sf::Color text_background_;
   sf::Color text_;
   sf::Color button_active_;
   sf::Color button_deactive_; 
-
 };
-
 // Some premade schemes
-GUI_Scheme Base_Scheme = { sf::Color(211, 211, 211), sf::Color(211, 211, 211),
-                           sf::Color::Black, sf::Color(144, 238, 144), sf::Color(255, 135, 132) };
-GUI_Scheme Halloween_Scheme = { sf::Color(136, 30, 228), sf::Color(136, 30, 228), 
-                                sf::Color(133, 226, 31), sf::Color(235, 97, 35), sf::Color::Black };
+const Gui_Scheme Base_Scheme = { sf::Color(211, 211, 211), sf::Color(211, 211, 211),
+                                 sf::Color::Black, sf::Color(144, 238, 144), 
+                                 sf::Color(255, 135, 132) };
+const Gui_Scheme Halloween_Scheme = { sf::Color(136, 30, 228), sf::Color(136, 30, 228), 
+                                      sf::Color(133, 226, 31), sf::Color(235, 97, 35),
+                                      sf::Color::Black };
 
+
+// HELPERS
 
 // Function alias for chrono's duration_cast<milliseconds>
 template <typename... Args>
@@ -65,8 +73,8 @@ auto duration_ms(Args&&... args) ->
   return std::chrono::duration_cast<std::chrono::milliseconds>(std::forward<Args>(args)...);
 }
 
-// Base class used to provide unique id's to gui elements(w/ state_) 
-// Used for unique indexability in GUI::state_ map
+// Base class used to provide unique id's to gui elements 
+// Used for unique indexability in Gui::state_ map
 class GUI_ID {
   // Return new id for each call
   static size_t get_gui_id() {
@@ -76,32 +84,26 @@ class GUI_ID {
   const size_t id_ = get_gui_id();
 public:
   // id_ indexing functions
-  const size_t id() const { return id_; }
-  const size_t operator()() const { return id_; }
+  size_t id() const { return id_; }
+  size_t operator()() const { return id_; }
 };
 
 
-/*
- *
- * BACKGROUND
- *
- */
+// BACKGROUND
 
 // Hold sf::RectangleShape of corresponding GUI background element w/ its GUI interface
 class Background_Impl {
-
+  
   sf::RectangleShape background_;
 
 public:
-  
   Background_Impl(const Background_Impl&) = delete;
   Background_Impl& operator=(const Background_Impl&) = delete;
-
   // params : width, height, pos_x, pos_y (from top left), color
   Background_Impl(size_t, size_t, size_t, size_t, sf::Color);
 
   void draw(sf::RenderWindow& window) const { window.draw(background_); }
-  friend GUI;
+  friend Gui;
 };
 
 Background_Impl::Background_Impl(size_t width, size_t height, size_t pos_x,
@@ -111,49 +113,35 @@ Background_Impl::Background_Impl(size_t width, size_t height, size_t pos_x,
   background_.setFillColor(color);
 }
 
-// Class used to create background elements, unique_ptr to implimentation class
-class Background {
-
+// Background_Impl Factory w/ unique_ptr to impl & unique id
+class Background : GUI_ID {
   std::unique_ptr<Background_Impl> pimpl_;
-
 public:
-
   // params : width, height, pos_x (from top left), pos_y (from top left), color
   Background(size_t w, size_t h, size_t x, size_t y, sf::Color c = Base_Scheme.background_):
-    pimpl_(std::make_unique<Background_Impl>(w, h, x, y,c)) { }
-
-  friend GUI;
+    pimpl_(std::make_unique<Background_Impl>(w, h, x, y, c)) { }
+  friend Gui;
 };
 
 
-/*
- *
- *  TEXT DISPLAY
- *
- */
+// TEXT DISPLAY
 
 // Hold sf::RectangleShape for background & sf::Text object of GUI element w/ its GUI interfacing
 class Text_Display_Impl {
-
 protected:
-    
   sf::RectangleShape background_;
   sf::Text text_;
-
   // setup function for text_ : size, position, and font after being given to a GUI obj
   void GUI_sizing(const sf::Font&);
 
 public:
-
   Text_Display_Impl(const Text_Display_Impl&) = delete;
   Text_Display_Impl& operator=(const Text_Display_Impl&) = delete;
-
   // params : width, height, pos_x, pos_y (from top left), label, color
   Text_Display_Impl(size_t, size_t, size_t, size_t, const std::string&, sf::Color);
 
   void draw(sf::RenderWindow& window) const { window.draw(background_); window.draw(text_); }
-
-  friend GUI;
+  friend Gui;
 };
 
 Text_Display_Impl::Text_Display_Impl(size_t width, size_t height, size_t pos_x,
@@ -166,15 +154,16 @@ Text_Display_Impl::Text_Display_Impl(size_t width, size_t height, size_t pos_x,
 }
 
 void Text_Display_Impl::GUI_sizing(const sf::Font& font) {
-  sf::Vector2f size = background_.getSize();
-  
   text_.setFont(font);
   if(text_.getString().getSize() != 0) {
-    size_t max_char_width = size.x / text_.getString().getSize();
-    text_.setCharacterSize(max_char_width < size.y ? max_char_width : size.y);
+    sf::Vector2f size = background_.getSize();
+    // Select max font size
+    unsigned int max_char_width = static_cast<unsigned int>(size.x) / text_.getString().getSize();
+    text_.setCharacterSize(max_char_width < size.y ? max_char_width : 
+                                                     static_cast<unsigned int>(size.y));
 
     // Helper lambda to get offset vector for first position set
-    static auto center_pos_TL = [](sf::FloatRect out, sf::FloatRect in){
+    auto center_pos_TL = [](sf::FloatRect out, sf::FloatRect in){
                                     return sf::Vector2f((out.width - in.width) / 2 + out.left,
                                                         (out.height - in.height) / 2 + out.top); }; 
     text_.setPosition(center_pos_TL(background_.getGlobalBounds(), text_.getGlobalBounds()));
@@ -184,132 +173,109 @@ void Text_Display_Impl::GUI_sizing(const sf::Font& font) {
   }
 }
 
-// Class used to create Text Display elements, unique_ptr to implimentation class
+// Text_Display_Impl Factory w/ unique_ptr to impl & unique id
 class Text_Display : public GUI_ID {
-
   std::unique_ptr<Text_Display_Impl> pimpl_;
-
 public:
-
   // params : width, height, pos_x, pos_y (from top left), label, background color
   Text_Display(size_t w, size_t h, size_t x, size_t y, const std::string& t, 
                sf::Color c = Base_Scheme.text_background_):
     pimpl_(std::make_unique<Text_Display_Impl>(w, h, x, y, t, c)) { }
-
-  friend GUI;
+  friend Gui;
 };
 
 
-/*
- *
- *  TOGGLE BUTTON
- *
- */
+// TOGGLE BUTTON
 
-// Holds Text_Display_Impl & active/deactive colors for graphics & state_
+// Is a Text_Display_Impl w/ active/deactive colors for graphics
+// state_ toggles each time clicked
 class Toggle_Button_Impl : Text_Display_Impl {
   
   bool state_;
   sf::Color active_color_;
   sf::Color deactive_color_;
 
-  public:
-
+public:
   Toggle_Button_Impl(const Toggle_Button_Impl&) = delete;
   Toggle_Button_Impl& operator=(const Toggle_Button_Impl&) = delete;
+  // params : width, height, pos_x, pos_y (from top left), label, state, active color, deactive color
+  Toggle_Button_Impl(size_t, size_t, size_t, size_t, const std::string&, bool, sf::Color, sf::Color);
 
-  // params : width, height, pos_x, pos_y (from top left), label, active color, deactive color
-  Toggle_Button_Impl(size_t, size_t, size_t, size_t, const std::string&, 
-                     sf::Color, sf::Color); // pixel based
-
+  bool get_state() const { return state_; }
   // Returns if passed coordinates are inside button range
   bool is_clicked(int x, int y) const { return background_.getGlobalBounds().contains(x, y); }
-  bool get_state() { return state_; }
-
-  // Sets state_ & corresonding color
-  void activate();
-  void deactivate();
-
-  friend GUI;
+  // Toggles state_ & corresonding color
+  void toggle();
+  friend Gui;
 };
 
 Toggle_Button_Impl::Toggle_Button_Impl(size_t width, size_t height, size_t pos_x, size_t pos_y, 
-                                       const std::string& label, 
+                                       const std::string& label, bool state,
                                        sf::Color active, sf::Color deactive):
-  Text_Display_Impl(width, height, pos_x, pos_y, label, deactive),
-  state_(false),
+  Text_Display_Impl(width, height, pos_x, pos_y, label, state ? active : deactive),
+  state_(state),
   active_color_(active),
   deactive_color_(deactive) { }
 
-void Toggle_Button_Impl::activate() {
-  state_ = true;
-  background_.setFillColor(active_color_);
+void Toggle_Button_Impl::toggle() {
+  state_ = !state_;
+  background_.setFillColor(state_ ? active_color_ : deactive_color_);
 }
 
-void Toggle_Button_Impl::deactivate() {
-  state_ = false;
-  background_.setFillColor(deactive_color_);
-}
-
-// Class used to create Toggle Button elements, unique_ptr to implimentation class
+// Toggle_Button_Impl Factory w/ unique_ptr to impl & unique id
 class Toggle_Button : public GUI_ID {
-
   std::unique_ptr<Toggle_Button_Impl> pimpl_;
-
 public:
-
-  // params : width, height, pos_x, pos_y (from top left), label, active color, deactive color
-  Toggle_Button(size_t w, size_t h, size_t x, size_t y, const std::string& t, 
+  // params : width, height, pos_x, pos_y (from top left), label, state, active color, deactive color
+  Toggle_Button(size_t w, size_t h, size_t x, size_t y, const std::string& t, bool s = false, 
                 sf::Color a = Base_Scheme.button_active_, 
                 sf::Color d = Base_Scheme.button_deactive_):
-    pimpl_(std::make_unique<Toggle_Button_Impl>(w, h, x, y, t, a, d)) { }
-
-  // params : width, height, pos_x, pos_y (from top left), label, active-deactive color pair
-  Toggle_Button(size_t w, size_t h, size_t x, size_t y, const std::string& t, 
+    pimpl_(std::make_unique<Toggle_Button_Impl>(w, h, x, y, t, s, a, d)) { }
+  // params : width, height, pos_x, pos_y (from top left), label, active color, deactive color
+  Toggle_Button(size_t w, size_t h, size_t x, size_t y, const std::string& t,
+                sf::Color a, sf::Color d):
+    pimpl_(std::make_unique<Toggle_Button_Impl>(w, h, x, y, t, false, a, d)) { }
+  // params : width, height, pos_x, pos_y (from top left), label, state, active-deactive color pair
+  Toggle_Button(size_t w, size_t h, size_t x, size_t y, const std::string& t, bool s,
                 std::pair<sf::Color, sf::Color> a_d_p):
-    pimpl_(std::make_unique<Toggle_Button_Impl>(w, h, x, y, t, a_d_p.first, a_d_p.second)) { }
-
-  friend GUI;
+    pimpl_(std::make_unique<Toggle_Button_Impl>(w, h, x, y, t, s, a_d_p.first, a_d_p.second)) { }
+  // params : width, height, pos_x, pos_y (from top left), label, active-deactive color pair
+  Toggle_Button(size_t w, size_t h, size_t x, size_t y, const std::string& t,
+                std::pair<sf::Color, sf::Color> a_d_p):
+    pimpl_(std::make_unique<Toggle_Button_Impl>(w, h, x, y, t, false, a_d_p.first, a_d_p.second)) { }
+  friend Gui;
 };
 
 
-/*
- *
- *  PUSH BUTTON
- *
- */
+// PUSH BUTTON
 
-// Holds Text_Display_Impl & active/deactive colors for graphics & state_
-// Also holds timing info for activation/deactivation of button
+// Is a Text_Display_Impl w/ active/deactive colors for graphics
+// state_ is true for one get_state() call after click
+// active_ is true for active_time_ ( in order to do active_color & click timing )
 class Push_Button_Impl : Text_Display_Impl {
 
   bool state_;
+  bool active_;
   sf::Color active_color_;
   sf::Color deactive_color_;
-
-  bool active_;
   std::chrono::milliseconds active_time_ = std::chrono::milliseconds(200);
   std::chrono::steady_clock::time_point start_time_;
 
 public:
-  
   Push_Button_Impl(const Push_Button_Impl&) = delete;
   Push_Button_Impl& operator=(const Push_Button_Impl&) = delete;
-
   // params : width, height, pos_x, pos_y (from top left), label, active color, deactive color
   Push_Button_Impl(size_t, size_t, size_t, size_t, const std::string&, sf::Color, sf::Color);
 
-  // Returns if passed coordinates are inside button range
-  bool is_clicked(int x, int y) const { return background_.getGlobalBounds().contains(x, y); }
   // Returns state_ ( & sets state_ to false after being called, so only get one true per click )
   bool get_state();
-
-  // Set state_ & active characteristics & start timer if not already active
+  // Returns if passed coordinates are inside button range
+  bool is_clicked(int x, int y) const { return background_.getGlobalBounds().contains(x, y); }
+  // Set state_, active characteristics, & start timer - if !active_
   void activate(); 
   // Deactivate after timer is up
   void update();
-
-  friend GUI;
+  friend Gui;
 };
 
 Push_Button_Impl::Push_Button_Impl(size_t width, size_t height, 
@@ -317,9 +283,9 @@ Push_Button_Impl::Push_Button_Impl(size_t width, size_t height,
                                    sf::Color active, sf::Color deactive):
   Text_Display_Impl(width, height, pos_x, pos_y, label, deactive),
   state_(false),
+  active_(false),
   active_color_(active),
-  deactive_color_(deactive),
-  active_(false) { }
+  deactive_color_(deactive) { }
 
 void Push_Button_Impl::activate() {
   if(!active_) {
@@ -346,46 +312,34 @@ void Push_Button_Impl::update() {
   }
 }
 
-// Class used to create Push Button elements, unique_ptr to implimentation class
+// Push_Button_Impl Factory w/ unique_ptr to impl & unique id
 class Push_Button : public GUI_ID {
-
   std::unique_ptr<Push_Button_Impl> pimpl_;
-
 public:
   // params : width, height, pos_x, pos_y (from top left), label, active color, deactive color
   Push_Button(size_t w, size_t h, size_t x, size_t y, const std::string& t, 
               sf::Color a = Base_Scheme.button_active_, sf::Color d = Base_Scheme.button_deactive_):
     pimpl_(std::make_unique<Push_Button_Impl>(w, h, x, y, t, a, d)) { }
-
   // params : width, height, pos_x, pos_y (from top left), label, active-deactive color pair
   Push_Button(size_t w, size_t h, size_t x, size_t y, const std::string& t, 
               std::pair<sf::Color, sf::Color> a_d_p):
     pimpl_(std::make_unique<Push_Button_Impl>(w, h, x, y, t, a_d_p.first, a_d_p.second)) { }
-
-  friend GUI;
+  friend Gui;
 };
 
 
-/*
- *
- * GUI
- *
- */
+// GUI
 
-// GUI class which stores created GUI elements, does clicking & updating in its own thread,
-// and allows obtaining the state of all the GUI elements & drawing of elements
-class GUI {
+// Interface class for drawing and getting state of the GUI for the user; also stores GUI elements 
+// Has its own designated thread ( gui_thread_ ) for user input and updating states
+class Gui {
 
-  // Runs GUI_Loop function
-  std::thread gui_thread_;
- 
-  // How long GUI waits between clicks
+  bool clicked_;
+  // Time GUI disables clicks after a click ( how long clicked_ stays true )
   std::chrono::milliseconds click_sensitive_dur_ = std::chrono::milliseconds(300);
-  // Helpers to calculate when clickable ( ie so one click doesnt register as a ton )
-  bool clicked_; // TO DO : Store last click?
   std::chrono::steady_clock::time_point last_click_;
 
-  // If need to calculate state_ again
+  // If need to calculate state_ again ( after an updated state )
   bool new_state_;
   // button id_ to bool state_ ( true - active, false - inactive )
   std::map<size_t, bool> state_;
@@ -393,34 +347,36 @@ class GUI {
   sf::Font font_;
 
   // GUI elements
-  std::vector<std::unique_ptr<Background_Impl>> backgrounds_;
+  std::map<size_t, std::unique_ptr<Background_Impl>> backgrounds_;
   std::map<size_t, std::unique_ptr<Text_Display_Impl>> text_displays_;
   std::map<size_t, std::unique_ptr<Toggle_Button_Impl>> toggle_buttons_;
   std::map<size_t, std::unique_ptr<Push_Button_Impl>> push_buttons_;
 
-  // Locks push_button update if push_button being inserted
+  // Maps Toggle_Button id to vector of ids to linked toggle_buttons_ ( only if there is linkage )
+  std::map<size_t, std::shared_ptr<std::vector<size_t>>> linked_toggles_;
+  // Deactivate the toggle_buttons_ linked to id passed in
+  void deactivate_links(size_t);
+
+  std::thread gui_thread_;
+  // Locks push_button update while push_button inserted ( prevents thread accessing unready ptr )
   bool update_lock_ = false;
   // window loop that the gui_thread_ runs
-  void GUI_Loop(const sf::RenderWindow&);
+  void gui_loop(const sf::RenderWindow&);
 
 public:
-
-  GUI(const GUI&) = delete;
-  GUI& operator=(const GUI&) = delete;
-
+  Gui(const Gui&) = delete;
+  Gui& operator=(const Gui&) = delete;
   // params : window, font
-  GUI(const sf::RenderWindow&, const sf::Font& = sf::Font());
-  ~GUI() { gui_thread_.join(); }
+  Gui(const sf::RenderWindow&, const sf::Font& = sf::Font());
+  ~Gui() { gui_thread_.join(); }
 
-  // Draw GUI to the window
+  // Draws in order : backgrounds_, text_displays_, toggle_buttons_, push_buttons_
   void draw(sf::RenderWindow&) const;
-  // Return const reference to the state_ map, recalculates state_ only if new_state_=true
-  // This reference will have a chance of invalidating other refs from get_state made if it updates
+  // Returns state_ map, recalculates state_ only if new_state_==true (ie use invalidates last ref)
   const std::map<size_t, bool>& get_state();
-
   // Get & Set text in text_displays_
   std::string get_text(size_t id) const;
-  void set_text(size_t id, std::string text);
+  void set_text(size_t id, const std::string& text);
 
   // SET COLORS
 
@@ -434,20 +390,17 @@ public:
   void set_button_color(sf::Color, sf::Color);
   // params : active-deactive color pair
   void set_button_color(std::pair<sf::Color, sf::Color>);
-  // params : GUI_Scheme class
-  void set_color_scheme(const GUI_Scheme&);
+  // params : Gui_Scheme class
+  void set_color_scheme(const Gui_Scheme&);
 
   // Add Parts of GUI ( background , text display , push & toggle buttons )
 
-  // Inserts underlying Background_Impl's into background_
   // params : Background, ...
   template<typename... Args,
            typename = std::enable_if_t<std::conjunction_v<std::is_same<Background&, Args>...>> >
   void add_background(Args&&... args) {
-    (backgrounds_.emplace_back(std::move(args.pimpl_)), ...);
+    (backgrounds_.emplace(args(), std::move(args.pimpl_)), ...);
   }
-
-  // Inserts into text_displays_ & sets text sizes for underlying Text_Display_Impl's
   // params : Text_Display, ...
   template<typename... Args, 
            typename = std::enable_if_t<std::conjunction_v<std::is_same<Text_Display&, Args>...>> >
@@ -455,9 +408,6 @@ public:
     (args.pimpl_->GUI_sizing(font_), ...);
     (text_displays_.emplace(args(), std::move(args.pimpl_)), ...);
   }
-
-
-  // Inserts into toggle_buttons_ & new_state_=true & text sizes for underlying Text_Display_Impl's
   // params : Toggle_Button, ...
   template<typename... Args,
            typename = std::enable_if_t<std::conjunction_v<std::is_same<Toggle_Button&, Args>...>> >
@@ -466,8 +416,17 @@ public:
     (toggle_buttons_.emplace(args(), std::move(args.pimpl_)), ...);
     new_state_ = true;
   }
-
-  // Inserts into push_buttons_ & new_state_=true & text sizes for underlying Text_Display_Impl's
+  // params : Toggle_Button, ... ( to be linked )
+  template<typename... Args,
+           typename = std::enable_if_t<std::conjunction_v<std::is_same<Toggle_Button&, Args>...>> >
+  void add_linked_toggle(Args&&... args) {
+    (args.pimpl_->GUI_sizing(font_), ...);
+    (toggle_buttons_.emplace(args(), std::move(args.pimpl_)), ...);
+    auto linked_vec = std::make_shared<std::vector<size_t>>();
+    (linked_vec->push_back(args()), ...);
+    (linked_toggles_.emplace(args(), linked_vec), ...);
+    new_state_ = true;
+  }
   // params : Push_Button, ...
   template<typename... Args,
            typename = std::enable_if_t<std::conjunction_v<std::is_same<Push_Button&, Args>...>> >
@@ -478,16 +437,13 @@ public:
     new_state_ = true;
     update_lock_ = false;
   }
-
 };
 
-GUI::GUI(const sf::RenderWindow& window, const sf::Font& font):
+Gui::Gui(const sf::RenderWindow& window, const sf::Font& font):
   clicked_(false),
   new_state_(true) {
-
   // Launch Thread
-  gui_thread_ = std::thread(&GUI::GUI_Loop, this, std::cref(window));
-  
+  gui_thread_ = std::thread(&Gui::gui_loop, this, std::cref(window));
   // Load default or passed font
   if(font.getInfo().family.empty()) {
     if(!font_.loadFromFile("/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf")) {
@@ -499,7 +455,14 @@ GUI::GUI(const sf::RenderWindow& window, const sf::Font& font):
   }
 }
 
-void GUI::GUI_Loop(const sf::RenderWindow& window) {
+void Gui::deactivate_links(size_t id) {
+  if(linked_toggles_.count(id) != 0) {
+    for(size_t idx : *linked_toggles_.at(id) )
+      if(idx != id && toggle_buttons_[idx]->get_state()) toggle_buttons_[idx]->toggle();
+  }
+}
+
+void Gui::gui_loop(const sf::RenderWindow& window) {
   while(window.isOpen()) {
     if(clicked_) {
       // Wait till it has been over click_sensitive_dur_ milliseconds & make clickable again
@@ -507,12 +470,13 @@ void GUI::GUI_Loop(const sf::RenderWindow& window) {
         clicked_ = false;
       }
     } else {
-      // If clicked check if any button was clicked & set clicked_ / timer
+      // If clicked check if any button was clicked, set state accordingly, & set clicked_ + timer
       if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
         sf::Vector2i position = sf::Mouse::getPosition(window);
         for(auto& [key, button] : toggle_buttons_) {
           if(button->is_clicked(position.x, position.y)) {
-            button->get_state() ? button->deactivate() : button->activate();
+            button->toggle();
+            deactivate_links(key);
             new_state_ = true;
           } 
         }
@@ -532,16 +496,15 @@ void GUI::GUI_Loop(const sf::RenderWindow& window) {
   }
 }
 
-void GUI::draw(sf::RenderWindow& window) const {
-  for(auto& back : backgrounds_) back->draw(window);
+void Gui::draw(sf::RenderWindow& window) const {
+  for(const auto& [key, back] : backgrounds_) back->draw(window);
   for(const auto& [key, text] : text_displays_) text->draw(window);
   for(const auto& [key, button] : toggle_buttons_) button->draw(window);
   for(const auto& [key, button] : push_buttons_) button->draw(window); 
 }
 
-// NOTE : This reference gets invalidated as soon as this function is called again because it may
-//        change the map each call
-const std::map<size_t, bool>& GUI::get_state() {
+// NOTE : Last reference gets invalidated when this function is called bc state_ map may change
+const std::map<size_t, bool>& Gui::get_state() {
   if(new_state_) {
     new_state_ = false;
     for(auto& [key, button] : toggle_buttons_) {
@@ -559,64 +522,54 @@ const std::map<size_t, bool>& GUI::get_state() {
   return state_;
 }
 
-// TO DO : Document these new functions
-std::string GUI::get_text(size_t id) const {
+std::string Gui::get_text(size_t id) const {
   if(text_displays_.count(id)) {
     return text_displays_.at(id)->text_.getString();
   } else {
-    // TO DO : Send error
-    return "";
+    throw std::runtime_error("Invalid Text_Display id given in get_text: id=" + std::to_string(id));
   }
 }
 
-void GUI::set_text(size_t id, std::string text) {
+void Gui::set_text(size_t id, const std::string& text) {
   if(text_displays_.count(id)) {
     text_displays_[id]->text_.setString(text);
     text_displays_[id]->GUI_sizing(font_); // TO DO : Think about not setting font again
   } else {
-    // TO DO : Send error
+    throw std::runtime_error("Invalid Text_Display id given in set_text: id=" + std::to_string(id));
   }
 }
 
-void GUI::set_background_color(sf::Color bg_c) {
+void Gui::set_background_color(sf::Color bg_c) {
   set_background_color(bg_c, bg_c);
 }
-
-void GUI::set_background_color(sf::Color bg_c, sf::Color text_bg_c) {
-  for(auto& bg : backgrounds_) bg->background_.setFillColor(bg_c);
+void Gui::set_background_color(sf::Color bg_c, sf::Color text_bg_c) {
+  for(auto& [key, bg] : backgrounds_) bg->background_.setFillColor(bg_c);
   for(auto& [key, bg] : text_displays_) bg->background_.setFillColor(text_bg_c);
 }
-
-void GUI::set_text_color(sf::Color t) {
+void Gui::set_text_color(sf::Color t) {
   for(auto& [key, text] : text_displays_) text->text_.setFillColor(t);
   for(auto& [key, button] : push_buttons_) button->text_.setFillColor(t);
   for(auto& [key, button] : toggle_buttons_) button->text_.setFillColor(t);
 }
-
-void GUI::set_button_color(sf::Color active, sf::Color deactive) {
+void Gui::set_button_color(sf::Color active, sf::Color deactive) {
   for(auto& [key, button] : push_buttons_) {
     button->active_color_ = active;
     button->deactive_color_ = deactive;
-    button->state_ ? button->background_.setFillColor(active) : 
-                     button->background_.setFillColor(deactive);
+    button->background_.setFillColor(button->state_ ? active : deactive);
   }
   for(auto& [key, button] : toggle_buttons_) {
     button->active_color_ = active;
     button->deactive_color_ = deactive;
-    button->state_ ? button->background_.setFillColor(active) : 
-                     button->background_.setFillColor(deactive);
+    button->background_.setFillColor(button->state_ ? active : deactive);
   }
 }
-
-void GUI::set_button_color(std::pair<sf::Color, sf::Color> act_deact_pair) {
+void Gui::set_button_color(std::pair<sf::Color, sf::Color> act_deact_pair) {
   set_button_color(act_deact_pair.first, act_deact_pair.second);
 }
-
-void GUI::set_color_scheme(const GUI_Scheme& gs) {
+void Gui::set_color_scheme(const Gui_Scheme& gs) {
   set_background_color(gs.background_, gs.text_background_);
   set_text_color(gs.text_);
   set_button_color(gs.button_active_, gs.button_deactive_);
 }
 
-// Going Forward : 
-// release
+#endif

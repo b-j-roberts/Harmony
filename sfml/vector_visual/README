@@ -1,0 +1,101 @@
+***********************************************************
+*
+*
+*  C++ 2D Vector Height Visualizer by Brandon Roberts
+*  Version 1.1 Update : Slight overhaul & Cleaning ( Impl Functions )
+*
+*
+***********************************************************
+
+** Contains **
+--------------
+Harmony/SFML/vector_visual/2D_vector_height.h
+
+
+** Ideas **
+-----------
+Listed as TO DO in code
+Look into color things , links listed in look_into file
+
+
+** Issues **
+------------
+Listed as TO DO in code
+
+
+** Dependancies **
+------------------
+SFML
+
+
+** Compiling **
+---------------
+If included in main.cpp:
+  g++ -c main.cpp -I ~/workspace
+  g++ main.o -o main $SFML
+
+i.e. C++11 & use SFML alias made in .bashrc ( for link libraries )
+
+
+** READ **
+----------
+
+This is an SFML vector height visualizer that will, based on the shader & function picked, 
+  display the vector heights on a window as various colors.
+
+
+** Interface **
+--------------
+
+Create Custom Shaders :
+
+  publically inherit from Shader & create a public function with signature :
+    sf::Color color(float shift) const override;
+  This function should return a color based on a given shift value ranging from 0.f - 1.f
+
+Current ( Built-in ) Shaders : 
+
+  Basics: These are single color scale shaders
+    Red_Shader - shifts from Black to Red
+    Green_Shader - shifts from Black to Green
+    Blue_Shader - shifts from Black to Blue
+    Yellow_Shader - shifts from Black to Yellow
+    Purple_Shader - shifts from Black to Purple
+    Cyan_Shader - shifts from Black to Cyan
+    Grayscale_Shader - shifts from Black to White
+
+  Jet: These are based on the Matlab Jet colormap function
+    Jet_BTR_Shader - Jet colormap from Blue to Red (Traditional)
+    Jet_RTB_Shader - Jet colormap from Red to Blue
+    Jet_BTG_Shader - Jet colormap from Blue to Green
+    Jet_GTB_Shader - Jet colormap from Green to Blue
+    Jet_GTR_Shader - Jet colormap from Green to Red
+    Jet_RTG_Shader - Jet colormap from Red to Green
+    Jet_Shader - alias for Jet_BTR_Shader
+
+Visualization Functions :
+
+  Linear Range Shaders :
+    linear_Range_Shader_Impl(window, vector, shader, range_min, range_max, bool condition(int, int))
+      - Draws 2D rectangle 'vector' to 'window' with 'shader' st 'range_min' cooresponds to 0.f &
+        'range_max' to 1.f for the shader ( linearly interpolated ).
+        'condition(y, x)' is a function returning true if vector[y][x] should be drawn to 'window'
+
+    linear_Range_Shader(window, vector, shader, range_min=0.f, range_max=1.f) :
+      - Calls impl with 'condition' always true & w/ special defaulted values
+    linear_Range_Shader_Mesh(window, vector, shader, mesh_size=5, range_min=0.f, range_max=1.f) :
+      - Calls impl with 'condition' true if y % mesh_size == 0 || x % mesh_size == 0 ( & defaults )
+    linear_Range_Shader_Dots(window, vector, shader, mesh_size=5, range_min=0.f, range_max=1.f) :
+      - Calls impl with 'condition' true if y % mesh_size == 0 && x % mesh_size == 0 ( & defaults )
+    ex : linear_Range_Shader(window, vec, Blue_Shader(), -.5, .5);
+
+  Make or Break :
+    make_Or_Break_Impl(window, vector, color, bool condition(float)) :
+      - Draws 2D rect 'vector' to 'window' only on points vector[y][x] st 
+        'condition(vector[y][x])' is true, draws point as 'color'
+
+    make_Or_Break(window, vector, float break_val, color) :
+      - Calls impl with 'condition' true if vector[y][x] >= 'break_val'
+    make_Or_Break_Range(window, vector, float break_min, float break_max, color) :
+      - Calls impl with 'condition' true if 'break_min' <= vector[y][x] <= 'break_max'
+    ex : make_Or_Break(window, vec, .5, sf::Color::Green);

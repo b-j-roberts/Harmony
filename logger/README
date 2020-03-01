@@ -2,7 +2,7 @@
 *
 *
 *  Leveled Logger by Brandon Roberts
-*  Version 1.00 Update : Logger Release
+*  Version 1.1 Update : Logger Slight Change to ostream and Clean
 *
 *
 ***********************************************************
@@ -13,13 +13,7 @@ Harmony/logger/logger.h
 
 ** Issues **
 ------------
-Listed as TO DO in the code:
-  KILL Level
-  Stream Constructor
-  Allow appending
-  buf size too small?
-  display level?
-
+Listed as TO DO in the code
 
 ** Dependencies **
 ------------------
@@ -29,10 +23,10 @@ NONE
 ** Compiling **
 --------------
 if included in main.cpp:
-  g++ -c main.cpp
+  g++ -c main.cpp -I ~/workspace
   g++ main.o -o main
 
-ie. Normal
+ie. C++11
 
 
 ** READ **
@@ -44,34 +38,33 @@ This is a leveled logger, ie it will only output messages that are at or "below"
 ** Interface **
 ---------------
 
-Log_Level's : FATAL
-              WARN
-              INFO
-              DEBUG
+  Log_Level's : FATAL
+                WARN
+                INFO
+                DEBUG
+    ex : Log_Level::DEBUG
 
-Construction : 
-    Logger logger_name(string filename, Log_Level level)
-    -- filename = streamed outfile , 
-       level = level to output anything less than (defaults to INFO)
+  Construction : 
+      Logger logger_name(ostream& output_stream, Log_Level level = INFO)
+         level = level to output anything less than or equal to
 
-To print : 
-    printf(Log_Level level, char * format, ...)
-    sprintf(Log_Level level, char * format, ...)
-    -- These use sprintf(buf, format, ...) with buf of size 4196 if level <= logger lvl
+  To print : 
+      printf(Log_Level level, char * format, ...)
+      sprintf(Log_Level level, char * format, ...)
+      -- These use sprintf(buf, format, ...) with buf of size 4196 if level <= logger lvl
 
-    printf(Log_Level level, string s)
-    sprintf(Log_Level level, string s)
-    -- These output string s to outfile if level <= logger lvl
+      printf(Log_Level level, string s)
+      sprintf(Log_Level level, string s)
+      -- These output string s to outfile if level <= logger lvl
 
-    snprintf(Log_Level level, int len, char * format, ...)
-    -- This uses snprint(buf, len, format, ...) with buf of size len if level <= logger lvl
+      snprintf(Log_Level level, size_t len, char * format, ...)
+      -- This uses snprint(buf, len, format, ...) with buf of size len if level <= logger lvl
 
-Stream Level : 
-    There is a member named stream_level that holds the current level streamed 
-    messages come in as, defaults to level passed in constructor, and to change use 
-    logger_name << new_level;
-    ie. this will change stream_level to Log_Level new_level
-                    
-Instream operator (<<) : 
-    logger_name << streamable_object
-    NOTE : this streamable_object will be copy constructed, unless a string
+  Stream Level : 
+      There is a member named stream_level that holds the current level streamed 
+      messages come in as, defaults to level passed in constructor, and to change use 
+      `logger_name << new_level;`
+      ie. this will change stream_level to Log_Level new_level
+                      
+  Instream operator (<<) : 
+      logger_name << streamable_object

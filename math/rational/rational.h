@@ -1,96 +1,43 @@
-#include <stdexcept>
+#ifndef HARMONY_RATIONAL_H
+#define HARMONY_RATIONAL_H
 
 #include <ostream>
 
-// TO DO : Major sizing issue comes into play when finding denominators for adding 
-//           and comparing greater because we are multiplying 2 numbers together so this 
-//           can get large pretty quickly..
-//           think of a way to avoid this?
-// TO DO : Improve reduce function
-// TO DO : Improve addition to fix sizes
-// TO DO : Improve greater check to fix sizes
-// TO DO : Reciprical function (with 0 checking) to replace divide
-// TO DO : Think about implicit conversion
+#include <stdexcept> // runtime_error
 
+#include <numeric> // gcd
+
+// TO DO : Reciprical function (with 0 checking) to replace divide
+// TO DO : Implicit conversion Operators
+// TO DO : Overflow?
+// TO DO : Constexpr & noexcept
+
+// Rational Number ( Represents space QQ ) that is always reduced in form num_ / denom_
 class Rational {
 
   bool negative_;
+  // numerator & denominator
   int num_, denom_;
 
-  void reduce() { 
-    if(num_ < 0) {
-      num_ *= -1;
-      negative_ = !negative_;
-    }
-    if(denom_ < 0) {
-      denom_ *= -1;
-      negative_ = !negative_;
-    }
-    for(unsigned i = 2; i <= num_ && i <= denom_; ++i) { // TO DO : Think about best max value here
-      while(num_ % i == 0 && denom_ % i == 0) {
-        num_ /= i;
-        denom_ /= i;
-      }
-    }
-  }
-
-  void unsigned_add(const Rational& rhs) { 
-    if(denom_ == rhs.denom_) {
-      negative_ ? num_ -= rhs.num_ : num_ += rhs.num_;
-    } else { // TO DO : Think about lcd
-      num_ *= rhs.denom_;
-      negative_ ? num_ -= rhs.num_ * denom_ : num_ += rhs.num_ * denom_;
-      denom_ *= rhs.denom_;
-    }
-    reduce();
-  }
-
-  void unsigned_subtract(const Rational& rhs) {
-    if(denom_ == rhs.denom_) {
-      negative_ ? num_ += rhs.num_ : num_ -= rhs.num_;
-    } else {
-      num_ *= rhs.denom_;
-      negative_ ? num_ += rhs.num_ * denom_ : num_ -= rhs.num_ * denom_;
-      denom_ *= rhs.denom_;
-    }
-    reduce();
-  }
-
-  void multiply(const Rational& rhs) {
-    negative_ ^= rhs.negative_;
-    num_ *= rhs.num_;
-    denom_ *= rhs.denom_;
-    reduce();
-  }
-
-  void divide(const Rational& rhs) {
-    negative_ ^= rhs.negative_;
-    num_ *= rhs.denom_;
-    denom_ *= rhs.num_;
-    reduce();
-  }
-
-  bool equal(const Rational& rhs) const {
-    return num_ == rhs.num_ && denom_ == rhs.num_ && negative_ == rhs.negative_;
-  }
-
-  bool greater(const Rational& rhs) const {
-    if(negative_ xor rhs.negative_) return !negative_;
-    else if(negative_) {
-      if(denom_ == rhs.denom_) return num_ < rhs.num_;
-      else {
-        return num_ * rhs.denom_ < rhs.num_ * denom_;
-      }
-    } else {
-      if(denom_ == rhs.denom_) return num_ > rhs.num_;
-      else {
-        return num_ * rhs.denom_ > rhs.num_ * denom_;
-      }
-    }
-  }
+  // Reduce rational number
+  void reduce();
+  // Helper functions for adding independant of rhs side sign
+  void unsigned_add(const Rational&);
+  void unsigned_subtract(const Rational&);
 
 public:
 
+  // Default value is 0
+  Rational():  negative_(false), num_(0), denom_(1) { }
+  explicit Rational(int num, int denom = 1):
+    negative_(false),
+    num_(num),
+    denom_(denom) {
+    if(denom == 0) throw std::runtime_error("Denominator == 0 Error!");
+    reduce();
+  }
+
+  // Incrementing
   Rational& operator++();
   Rational operator++(int);
   Rational& operator--();
@@ -100,24 +47,13 @@ public:
   Rational& operator*=(const Rational&);
   Rational& operator/=(const Rational&);
 
-
-  Rational(): num_(0), denom_(1), negative_(false) { }
-
-  explicit Rational(int num, int denom = 1):
-    negative_(false),
-    num_(num),
-    denom_(denom) {
-    if(denom == 0) throw std::runtime_error("Denominator == 0 Error!");
-    reduce();
-  }
-
-  // Default copy constructor and copy assignment operator
-
+  // Operations
   friend const Rational operator+(const Rational&, const Rational&);
   friend const Rational operator-(const Rational&, const Rational&);
   friend const Rational operator*(const Rational&, const Rational&);
   friend const Rational operator/(const Rational&, const Rational&);
 
+  // Comparison
   friend bool operator==(const Rational&, const Rational&);
   friend bool operator!=(const Rational&, const Rational&);
   friend bool operator<(const Rational&, const Rational&);
@@ -125,9 +61,50 @@ public:
   friend bool operator<=(const Rational&, const Rational&);
   friend bool operator>=(const Rational&, const Rational&);
 
+  // Stream
   friend std::ostream& operator<<(std::ostream&, const Rational&);
-
 };
+
+void Rational::reduce() { 
+  if(num_ < 0) {
+    num_ *= -1;
+    negative_ = !negative_;
+  }
+  if(denom_ < 0) {
+    denom_ *= -1;
+    negative_ = !negative_;
+  }
+
+  int divisor = std::gcd(num_, denom_);
+  num_ /= divisor;
+  denom_ /= divisor;
+}
+
+void Rational::unsigned_add(const Rational& rhs) { 
+  if(denom_ == rhs.denom_) {
+    negative_ ? num_ -= rhs.num_ : num_ += rhs.num_;
+  } else {
+    int divisor = std::gcd(denom_, rhs.denom_);
+    num_ *= (rhs.denom_ / divisor);
+    negative_ ? num_ -= rhs.num_ * (denom_ / divisor) : num_ += rhs.num_ * (denom_ / divisor);
+    denom_ *= (rhs.denom_ / divisor); // lcm
+  }
+  reduce();
+  // TO DO : Think of constraint ( overflow ) vs complexity
+}
+
+void Rational::unsigned_subtract(const Rational& rhs) {
+  if(denom_ == rhs.denom_) {
+    negative_ ? num_ += rhs.num_ : num_ -= rhs.num_;
+  } else {
+    int divisor = std::gcd(denom_, rhs.denom_);
+    num_ *= (rhs.denom_ / divisor);
+    negative_ ? num_ += rhs.num_ * (denom_ / divisor) : num_ -= rhs.num_ * (denom_ / divisor);
+    denom_ *= (rhs.denom_ / divisor); // lcm
+  }
+  reduce();
+  // TO DO : Think of constraint ( overflow ) vs complexity
+}
 
 Rational& Rational::operator+=(const Rational& rhs) { 
   rhs.negative_ ? unsigned_subtract(rhs) : unsigned_add(rhs);
@@ -140,18 +117,24 @@ Rational& Rational::operator-=(const Rational& rhs) {
 }
 
 Rational& Rational::operator*=(const Rational& rhs) {
-  multiply(rhs);
+  negative_ ^= rhs.negative_;
+  num_ *= rhs.num_;
+  denom_ *= rhs.denom_;
+  reduce();
   return *this;
 }
 
 Rational& Rational::operator/=(const Rational& rhs) {
-  divide(rhs);
+  negative_ ^= rhs.negative_;
+  num_ *= rhs.denom_;
+  denom_ *= rhs.num_;
+  if(denom_ == 0) throw std::runtime_error("Dividing Rational by 0. ERROR!");
+  reduce();
   return *this;
 }
 
 // Increments by 1
-// Note : This does not need to call reduce because if already reduced then adding 1 will not make
-//        reducable
+// Note : Does not call reduce because if already reduced then adding 1 will not make it reducable
 Rational& Rational::operator++() { 
   num_ += denom_;
   return *this;
@@ -162,6 +145,7 @@ Rational Rational::operator++(int) {
   num_ += denom_;
   return temp;
 }
+
 Rational& Rational::operator--() { 
   num_ -= denom_;
   return *this;
@@ -197,36 +181,42 @@ const Rational operator/(const Rational& lhs, const Rational& rhs) {
   return ret;
 }
 
-// TO DO : Think about making static and using same format as Integer for the comparison ops
 bool operator==(const Rational& lhs, const Rational& rhs) {
-  return lhs.equal(rhs);
+  return lhs.negative_ == rhs.negative_ && lhs.num_ == rhs.num_ && lhs.denom_ == rhs.denom_;
 }
 
 bool operator!=(const Rational& lhs, const Rational& rhs) {
-  return !lhs.equal(rhs);
+  return !(lhs == rhs);
 }
 
 bool operator<(const Rational& lhs, const Rational& rhs) {
-  return rhs.greater(lhs);
+  return rhs > lhs;
 }
 
 bool operator>(const Rational& lhs, const Rational& rhs) {
-  return lhs.greater(rhs);
+  if(lhs.negative_ xor rhs.negative_) return !lhs.negative_;
+  if(lhs.denom_ == rhs.denom_) {
+    return (lhs.negative_ ? lhs.num_ < rhs.num_ : lhs.num_ > rhs.num_);
+  } else {
+    int divisor = std::gcd(lhs.denom_, rhs.denom_);
+    return (lhs.negative_ ? lhs.num_ * (rhs.denom_ / divisor) < rhs.num_ * (lhs.denom_ / divisor) :
+                            lhs.num_ * (rhs.denom_ / divisor) > rhs.num_ * (lhs.denom_ / divisor));
+    // TO DO : Think complexity vs restraint ( overflow )
+  }
 }
 
 bool operator<=(const Rational& lhs, const Rational& rhs) {
-  return rhs.greater(lhs) || rhs.equal(lhs);
+  return rhs > lhs || rhs == lhs;
 }
 
 bool operator>=(const Rational& lhs, const Rational& rhs) {
-  return lhs.greater(rhs) || lhs.equal(rhs);
+  return lhs > rhs || lhs == rhs;
 }
 
 std::ostream& operator<<(std::ostream& os, const Rational& r) {
-  if(r.denom_ == 1) {
-    os << (r.negative_ ? "-" : "") << r.num_;
-  } else {
-    os << (r.negative_ ? "-" : "") << r.num_ << " / " << r.denom_;
-  }
+  os << (r.negative_ ? "-" : "") << r.num_;
+  if(r.denom_ != 1) os << " / " << r.denom_;
   return os;
 }
+
+#endif

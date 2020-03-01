@@ -1,3 +1,6 @@
+#ifndef HARMONY_ARG_PARSER_H
+#define HARMONY_ARG_PARSER_H
+
 #include <string>
 #include <map>
 
@@ -9,6 +12,7 @@
 // TO DO : Think about constructor name convention, '-id' & '--name'
 // TO DO : Interface for -h? flag to show help_string after fully loaded?
 // TO DO : Check for illegitamite flags?
+// TO DO : Namespacing
 
 
 // Implimentation Things ( Helpers )
@@ -48,7 +52,7 @@ class Parser {
   std::map<std::string, std::shared_ptr<argument_base>> name_to_arg_;
 
   // String used to diplay help information : called when error thrown
-  std::string help_string;
+  std::string help_string_;
   inline static const std::string help_str_spaces = "           "; // Formatting spaces
 
   // Pre-parsed args <id/name, value> ( done at construction before add_arguments have been called )
@@ -58,7 +62,7 @@ class Parser {
 public:
 
   Parser(int argc, char** argv, const std::string& desc = ""):
-    help_string(desc + '\n') {
+    help_string_(desc + '\n') {
     // Do Pre-Parsing ( fills pre_parsed_ )
     // TO DO : Think about ways to let values start with '-'
     // TO DO : Think about if flag doesnt have value ( ie -v for verbose mode )
@@ -67,8 +71,8 @@ public:
         if(pre_parsed_.count(argv[i]) == 0) {
           pre_parsed_[argv[i]] = argv[i+1];
         } else {
-          help_string += help_str_spaces + "Make sure not to use same flag twice!\n";
-          throw std::runtime_error(help_string); 
+          help_string_ += help_str_spaces + "Make sure not to use same flag twice!\n";
+          throw std::runtime_error(help_string_); 
         }
       }
     }
@@ -82,7 +86,7 @@ public:
   void add_argument(const std::string& id, const std::string& name, 
                     const std::string& desc, bool required = false) {
     // TO DO : Show type info ( make names readable )
-    help_string += help_str_spaces + id + "   " + name + "   " + desc + 
+    help_string_ += help_str_spaces + id + "   " + name + "   " + desc + 
                    "  " + (required ? "(required)\n" : "(not required)\n"); 
     // TO DO : Error if pre_parsed id & name passed
     if(pre_parsed_.count(id)) {
@@ -92,8 +96,8 @@ public:
       T val = boost::lexical_cast<T>(pre_parsed_[name]);
       name_to_arg_.emplace(name.substr(2), std::make_shared<argument<T>>(val));
     } else if(required) {
-      help_string += help_str_spaces + "Required argument '" + name.substr(2) + "' not given!\n";
-      throw std::runtime_error(help_string); 
+      help_string_ += help_str_spaces + "Required argument '" + name.substr(2) + "' not given!\n";
+      throw std::runtime_error(help_string_); 
     }
   }
 
@@ -109,8 +113,10 @@ public:
       // TO DO : if(derived_ptr) ?
       return derived_ptr->value();
     } else {
-      help_string += help_str_spaces + "Indexed argument '" + name + "' not given!\n";
-      throw std::runtime_error(help_string);
+      help_string_ += help_str_spaces + "Indexed argument '" + name + "' not given!\n";
+      throw std::runtime_error(help_string_);
     }
   }
 };
+
+#endif

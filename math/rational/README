@@ -2,7 +2,7 @@
 *
 *
 *  C++ Rational Numbers by Brandon Roberts
-*  Version 1.00 Update : Realese!
+*  Version 1.1 Update : Cleaning & Slight Overhaul
 *
 *
 ***********************************************************
@@ -14,13 +14,15 @@ Harmony/rational/rational.h
 
 ** Ideas **
 -----------
-
 Add unsigned int version to increase number of possible numbers (this will decrease efficiency on
   adding and subtracting numbers of different & opposite signs respectively)
 
-Add an arb int version (wont have inefficieny above because arb int can be negative)
+Add an arb int version
 
-Others in TO DO list
+
+** Issues **
+------------
+Listed as TO DO on code
 
 
 ** Dependancies **
@@ -31,10 +33,10 @@ None
 ** Compiling **
 ---------------
 If included in main.cpp:
-  g++ -c main.cpp
-  g++ main.o -o main.cpp
+  g++ -c main.cpp -std=c++1z -I ~/workspace
+  g++ main.o -o main
 
-i.e. Normal
+i.e. C++17
 
 
 ** READ **

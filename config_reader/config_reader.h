@@ -1,3 +1,6 @@
+#ifndef HARMONY_CONFIG_READER_H
+#define HARMONY_CONFIG_READER_H
+
 #include <string>
 #include <map>
 #include <vector> // for as_vector() function
@@ -17,33 +20,34 @@
 
 // Stores string a key's value from a config file/string
 // Impliments as_* function to obtain string as different types
+namespace conf { // TO DO : Fix this and inline
 class Parameter {
 
-  const std::string value;
+  const std::string value_;
 
 public:
 
-  explicit Parameter(const std::string& s): value(s) { } 
-  Parameter() = default;
+  inline explicit Parameter(const std::string& s): value_(s) { } 
+  inline Parameter() = default;
 
-  // as_* functions to get parameter value
-  int as_int() const { return std::stoi(value); }                        // stoi
-  int as_int(int base) const { return std::stoi(value, nullptr, base); } // stoi with base
-  double as_double() const { return std::stod(value); }                  // stod
-  float as_float() const { return std::stof(value); }                    // stof
-  const std::string& as_string() const { return value; }                 // string
-  template <typename T> const T as() const { return boost::lexical_cast<T>(value); } // template
+  // as_* functions to get parameter value_
+  inline int as_int() const { return std::stoi(value_); }                        // stoi
+  inline int as_int(int base) const { return std::stoi(value_, nullptr, base); } // stoi with base
+  inline double as_double() const { return std::stod(value_); }                  // stod
+  inline float as_float() const { return std::stof(value_); }                    // stof
+  inline const std::string& as_string() const { return value_; }                 // string
+  template <typename T> const T as() const { return boost::lexical_cast<T>(value_); } // template
 
-  // Return vector of parameters if value of form : val1, val2, ...
-  const std::vector<Parameter> as_vector() const;
-  // Return map of parameters if value of form : key1 : val1, key2 : val2, ...
-  std::map<std::string, Parameter> as_map() const;
+  // Return vector of parameters if value_ of form : val1, val2, ...
+  inline const std::vector<Parameter> as_vector() const;
+  // Return map of parameters if value_ of form : key1 : val1, key2 : val2, ...
+  inline std::map<std::string, Parameter> as_map() const;
 };
 
-const std::vector<Parameter> Parameter::as_vector() const {
+inline const std::vector<Parameter> Parameter::as_vector() const {
   std::string curr_val;
   std::vector<Parameter> ret;
-  std::istringstream reader(value);
+  std::istringstream reader(value_);
   while(getline(reader, curr_val, ',')) {
     boost::trim(curr_val);
     ret.emplace_back(curr_val);
@@ -51,10 +55,10 @@ const std::vector<Parameter> Parameter::as_vector() const {
   return ret;
 }
 
-std::map<std::string, Parameter> Parameter::as_map() const {
+inline std::map<std::string, Parameter> Parameter::as_map() const {
   std::string curr_val;
   std::map<std::string, Parameter> ret;
-  std::istringstream reader(value);
+  std::istringstream reader(value_);
   while(getline(reader, curr_val, ',')) {
     size_t sep = curr_val.find(':');
     std::string key = curr_val.substr(0, sep);
@@ -68,7 +72,7 @@ std::map<std::string, Parameter> Parameter::as_map() const {
 
 
 // Return bracer pair for c if it is valid, otherwise returns pair of '\001'
-const std::pair<char, char>& is_valid_bracer(char c) {
+inline const std::pair<char, char>& is_valid_bracer(char c) {
   static const size_t delim_num = 6;
   static const std::array<std::pair<char, char>, delim_num> valid_bracers = 
      {{ {'{', '}'}, {'[', ']'}, {'\'', '\''}, {'(', ')'}, {'\"', '\"'}, {'<', '>'} }};
@@ -87,21 +91,21 @@ class Config_Reader {
   std::map<std::string, Parameter> params_;
 
   // Config_Reader from a string ( for nested Config_Readers )
-  Config_Reader(const std::string& str, const std::string& filename);
+  inline Config_Reader(const std::string& str, const std::string& filename);
   // Parse a stream type for Config_Readers & Parameters ( used to construct a Config_Reader )
-  void parse_config_stream(std::istream& s, const std::string& filename); 
+  inline void parse_config_stream(std::istream& s, const std::string& filename); 
 
 public:
 
   // Create Config_Reader from a file w/ path 'filename'
-  explicit Config_Reader(const std::string& filename);
+  inline explicit Config_Reader(const std::string& filename);
 
   // Returns whether this Config_Reader contains Config_Reader w/ key 'name'
   // TO DO : Allow checking nested Config_Readers like Parameters ?
-  bool has_config(const std::string& name) const { return configs_.count(name); }
+  inline bool has_config(const std::string& name) const { return configs_.count(name); }
   // Index configs_ map for Config_Reader
   // TO DO : Is this ever really needed ?
-  const Config_Reader& config(const std::string& name) const {
+  inline const Config_Reader& config(const std::string& name) const {
     if(configs_.count(name)) {
       return configs_.at(name);
     } else {
@@ -114,17 +118,17 @@ public:
   //   till last param_name which indexes last Config_Reader's params_ w/ key param_name
 
   // Returns whether there is a Parameter w/ key 'name' ( using nested syntax )
-  bool has_param(const std::string& name) const {
+  inline bool has_param(const std::string& name) const {
     // Uses functionality of param(name) to determine if accessable w/ nested syntax
     try { (void) param(name); } catch(...) { return false; }
     return true;
   }
   // Index Parameter w/ nested syntax
-  const Parameter& param(const std::string& param_path) const;
+  inline const Parameter& param(const std::string& param_path) const;
   const Parameter& operator[] (const std::string& param_path) const { return param(param_path); }
 };
 
-void Config_Reader::parse_config_stream(std::istream& s, const std::string& filename) {
+inline void Config_Reader::parse_config_stream(std::istream& s, const std::string& filename) {
   std::string curr_line;
   while(getline(s, curr_line)) {
     // Find key/value seperator
@@ -185,12 +189,12 @@ void Config_Reader::parse_config_stream(std::istream& s, const std::string& file
 }
 
 
-Config_Reader::Config_Reader(const std::string& str, const std::string& filename) { 
+inline Config_Reader::Config_Reader(const std::string& str, const std::string& filename) { 
   std::istringstream config_in(str);
   parse_config_stream(config_in, filename);
 }
 
-Config_Reader::Config_Reader(const std::string& filename) { 
+inline Config_Reader::Config_Reader(const std::string& filename) { 
   std::ifstream config_in(filename);
   if(config_in.is_open()) {
     parse_config_stream(config_in, filename);
@@ -199,7 +203,8 @@ Config_Reader::Config_Reader(const std::string& filename) {
   }
 }
 
-const Parameter& Config_Reader::param(const std::string& name) const {
+// TO DO : Think of way to access without making strings
+inline const Parameter& Config_Reader::param(const std::string& name) const {
   if(params_.count(name)) {
     return params_.at(name);
   } else {
@@ -210,4 +215,5 @@ const Parameter& Config_Reader::param(const std::string& name) const {
     else throw std::runtime_error("No Config matching name : " + name.substr(0, pos));
   }
 }
-
+}
+#endif
