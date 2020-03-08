@@ -59,7 +59,7 @@ NOTE : Each project has its own README that explains how to use and the implemet
 Make into cpp & headers? ( make into static library )
 Namespaces
 C++20
-
+Comment short circuits
 
 ** Issues **
 ------------

@@ -30,6 +30,7 @@
 // TO DO : Allow selection of min & max # of active linked toggles
 // TO DO : Default state checking on linked toggles
 // TO DO : Locking buttons into states, or from being clicked
+// TO DO : Link button click to button
 
 /*
 TO DO : FUTURE GUI ELEMENTS :
