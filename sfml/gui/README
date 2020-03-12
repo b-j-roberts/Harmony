@@ -2,20 +2,23 @@
 *
 *
 *  C++ SFML Based GUI by Brandon Roberts
-*  Version 1.1 Update : Cleaning , Linking, and default states
+*  Version 1.2 Update : Static Librarified
 *
 *
 ***********************************************************
 
 ** Contains **
 --------------
-Harmony/SFML/GUI/gui.h
+Harmony/sfml/gui/gui.h
+Harmony/sfml/gui/gui.cpp
 
 
 ** Ideas **
 -----------
 Listed as TO DO in code
 More color schemes
+wide strings and characters
+type in input fields
 
 
 ** Issues **
@@ -34,10 +37,10 @@ X11 (Xinitthreads)
 ---------------
 If included in main.cpp:
   - main.cpp must have `XInitThreads();` before initializing GUI object
-  g++ -c main.cpp -std=c++1z
-  g++ main.o -o main $SFML -pthread -lX11
+  g++ -c main.cpp -std=c++1z -I ~/workspace
+  g++ main.o -o main $SFML -pthread -lX11 -L ~/workspace/Harmony -lharmony-sfml
 
-i.e. C++17 & use SFML alias made in .bashrc & thread & lX11
+i.e. C++17 & use SFML alias made in .bashrc & thread & lX11 & in Harmony's libharmony-sfml.a
 
 
 ** READ **
@@ -69,6 +72,8 @@ GUI Construction :
   GUI gui_name(const sf::RenderWindow&, sf::Font=default font);
 
 GUI Elements Creating :
+
+  NOTE : All gui elements given a unique id which can be accessed with operator() or member func id()
   
   Background :
     Background(size_x, size_y, pos_x, pos_y (from top left), sf::Color = Base)

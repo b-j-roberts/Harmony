@@ -2,7 +2,7 @@
 *
 *
 *  Python-esk Argument Parser by Brandon Roberts
-*  Version 1.1 Update : Major Rework / Cleanup - C++17-ish
+*  Version 1.2 Update : Static Librarified
 *
 *
 ***********************************************************
@@ -10,6 +10,7 @@
 ** Contains **
 --------------
 Harmony/arg_parser/template_version/arg_parser.h
+Harmony/arg_parser/template_version/arg_parser.cpp
 
 
 ** Issues **
@@ -27,12 +28,12 @@ boost/lexical_cast.hpp - for lexical_cast
 if included in main.cpp:
 
   g++ -c main.cpp -I ~/workspace -std=c++1z
-  g++ main.o -o main
+  g++ main.o -o main -L ~/workspace/Harmony/ -lharmony-basic
 
   clang++ -c main.cpp -I ~/workspace -std=c++1z
-  clang++ main.o -o main
+  clang++ main.o -o main -L ~/workspace/Harmony/ -lharmony-basic
 
-ie. C++17
+ie. C++17 in Harmony's libharmony-basic.a
 
 
 ** READ **
@@ -94,7 +95,7 @@ Parser Object :
   }
 
   g++ -c main.cpp -I ~/workspace -std=c++1z
-  g++ main.o -o main
+  g++ main.o -o main -L ~/workspace/Harmony/ -lharmony-basic
 
   ./main -p 0.13 // ERROR : No -x or --xtra flag, which is required
   ./main -x 13 -p 0.124 --word hello

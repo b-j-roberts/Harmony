@@ -2,14 +2,17 @@
 *
 *
 *  C++ 2D Vector Height Visualizer by Brandon Roberts
-*  Version 1.1 Update : Slight overhaul & Cleaning ( Impl Functions )
+*  Version 1.2 Update : Static Librarified
 *
 *
 ***********************************************************
 
 ** Contains **
 --------------
-Harmony/SFML/vector_visual/2D_vector_height.h
+Harmony/sfml/vector_visual/2D_vector_height.h
+Harmony/sfml/vector_visual/2D_vector_height.cpp
+
+Harmony/sfml/vector_visual/visualizer.cpp ( code ready to be used with visual header )
 
 
 ** Ideas **
@@ -32,9 +35,9 @@ SFML
 ---------------
 If included in main.cpp:
   g++ -c main.cpp -I ~/workspace
-  g++ main.o -o main $SFML
+  g++ main.o -o main $SFML -L ~/workspace/Harmony/ -lharmony-sfml
 
-i.e. C++11 & use SFML alias made in .bashrc ( for link libraries )
+i.e. C++11 & use SFML alias made in .bashrc ( for link libraries ) & in Harmony's libharmony-sfml.a
 
 
 ** READ **

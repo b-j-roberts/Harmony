@@ -3,11 +3,10 @@
 
 #include <string>
 #include <map>
-
-#include <stdexcept> // runtime_error
 #include <memory> // shared_ptr & dynamic_pointer_cast
 
 #include <boost/lexical_cast.hpp>
+#include <stdexcept> // runtime_error
 
 // TO DO : Think about constructor name convention, '-id' & '--name'
 // TO DO : Interface for -h? flag to show help_string after fully loaded?
@@ -47,7 +46,6 @@ public:
 
 // Command line argument parser modelled after arg_parse in python
 class Parser {
-
   // Maps name of argument (given in add_argument) to argument value ( by ptr to base class )
   std::map<std::string, std::shared_ptr<argument_base>> name_to_arg_;
 
@@ -61,62 +59,53 @@ class Parser {
 
 public:
 
-  Parser(int argc, char** argv, const std::string& desc = ""):
-    help_string_(desc + '\n') {
-    // Do Pre-Parsing ( fills pre_parsed_ )
-    // TO DO : Think about ways to let values start with '-'
-    // TO DO : Think about if flag doesnt have value ( ie -v for verbose mode )
-    for(int i = 1; i < argc - 1; ++i) {
-      if(argv[i][0] == '-') {
-        if(pre_parsed_.count(argv[i]) == 0) {
-          pre_parsed_[argv[i]] = argv[i+1];
-        } else {
-          help_string_ += help_str_spaces + "Make sure not to use same flag twice!\n";
-          throw std::runtime_error(help_string_); 
-        }
-      }
-    }
-  }
-
+  Parser(int argc, char** argv, const std::string& desc = "");
   Parser(const Parser&) = delete;
   Parser& operator=(const Parser&) = delete; 
 
   // Appends argument to name_to_args_ if it was pre-parsed ( & requirement handling )
+  // params : <T> is arg type, id (-id), name (--name), description, arg required ( default false )
   template<typename T>
-  void add_argument(const std::string& id, const std::string& name, 
-                    const std::string& desc, bool required = false) {
-    // TO DO : Show type info ( make names readable )
-    help_string_ += help_str_spaces + id + "   " + name + "   " + desc + 
-                   "  " + (required ? "(required)\n" : "(not required)\n"); 
-    // TO DO : Error if pre_parsed id & name passed
-    if(pre_parsed_.count(id)) {
-      T val = boost::lexical_cast<T>(pre_parsed_[id]);
-      name_to_arg_.emplace(name.substr(2), std::make_shared<argument<T>>(val));
-    } else if(pre_parsed_.count(name)) {
-      T val = boost::lexical_cast<T>(pre_parsed_[name]);
-      name_to_arg_.emplace(name.substr(2), std::make_shared<argument<T>>(val));
-    } else if(required) {
-      help_string_ += help_str_spaces + "Required argument '" + name.substr(2) + "' not given!\n";
-      throw std::runtime_error(help_string_); 
-    }
-  }
+  void add_argument(const std::string&, const std::string&, const std::string&, bool = false);
 
   // If 'name' has corresponding add_argument entry & was a passed in argument
   bool has(const std::string& name) { return name_to_arg_.count(name); }
 
   // Get argument value corresponding to passed name
   template<typename T>
-  typename arg_ret<T>::type get(const std::string& name) {
-    if(name_to_arg_.count(name)) {
-      // Downcast Base pointer
-      auto derived_ptr = std::dynamic_pointer_cast<argument<T>>(name_to_arg_[name]);
-      // TO DO : if(derived_ptr) ?
-      return derived_ptr->value();
-    } else {
-      help_string_ += help_str_spaces + "Indexed argument '" + name + "' not given!\n";
-      throw std::runtime_error(help_string_);
-    }
-  }
+  typename arg_ret<T>::type get(const std::string& name);
 };
+
+template<typename T>
+void Parser::add_argument(const std::string& id, const std::string& name,
+                  const std::string& desc, bool required) {
+  // TO DO : Show type info ( make names readable )
+  help_string_ += help_str_spaces + id + "   " + name + "   " + desc +
+                 "  " + (required ? "(required)\n" : "(not required)\n");
+  // TO DO : Error if pre_parsed id & name passed
+  if(pre_parsed_.count(id)) {
+    T val = boost::lexical_cast<T>(pre_parsed_[id]);
+    name_to_arg_.emplace(name.substr(2), std::make_shared<argument<T>>(val));
+  } else if(pre_parsed_.count(name)) {
+    T val = boost::lexical_cast<T>(pre_parsed_[name]);
+    name_to_arg_.emplace(name.substr(2), std::make_shared<argument<T>>(val));
+  } else if(required) {
+    help_string_ += help_str_spaces + "Required argument '" + name.substr(2) + "' not given!\n";
+    throw std::runtime_error(help_string_); 
+  } 
+}
+
+template<typename T>
+typename arg_ret<T>::type Parser::get(const std::string& name) {
+  if(name_to_arg_.count(name)) {
+    // Downcast Base pointer
+    auto derived_ptr = std::dynamic_pointer_cast<argument<T>>(name_to_arg_[name]);
+    // TO DO : if(derived_ptr) ?
+    return derived_ptr->value();
+  } else {
+    help_string_ += help_str_spaces + "Indexed argument '" + name + "' not given!\n";
+    throw std::runtime_error(help_string_);
+  }
+}
 
 #endif

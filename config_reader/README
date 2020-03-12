@@ -2,7 +2,7 @@
 *
 *
 *  C++ Config File Reader by Brandon Roberts
-*  Version 1.1 Update : Slight Overhaul & Cleaning
+*  Version 1.2 Update : Static Librarified
 *
 *
 ***********************************************************
@@ -10,6 +10,7 @@
 ** Contains **
 --------------
 Harmony/config_reader/config_reader.h
+Harmony/config_reader/config_reader.cpp
 
 
 ** Isssues **
@@ -20,7 +21,6 @@ Listed as 'TO DO' in code
 ** Dependancies **
 ------------------
 boost/lexical_cast.hpp
-boost/algorithm/string/trim.hpp
 
 
 ** Compiling **
@@ -28,12 +28,12 @@ boost/algorithm/string/trim.hpp
 if included in main.cpp:
 
   g++ -c main.cpp -I ~/workspace
-  g++ main.o -o main
+  g++ main.o -o main -L ~/workspace/Harmony/ -lharmony-basic
 
   clang++ -c main.cpp -I ~/workspace
-  clang++ main.o -o main
+  clang++ main.o -o main -L ~/workspace/Harmony/ -lharmony-basic
 
-ie. C++11
+ie. C++11 & in Harmony's libharmony-basic.a
 
 
 ** READ **
@@ -154,7 +154,7 @@ use in main.cpp:
   }
 
   g++ -c main.cpp -I "~/workspace"
-  g++ main.o -o main
+  g++ main.o -o main -L ~/workspace/Harmony -lharmony-basic
 
   ./main
 

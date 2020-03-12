@@ -4,8 +4,6 @@
 #include <string>
 #include <ostream>
 
-#include <cstdarg> // va_start & va_end
-
 // TO DO : KILL to kill the program on encounter ( -1 )
 // TO DO : Add verbose mode
 // TO DO : Think about displaying level printed at
@@ -33,58 +31,20 @@ public:
     stream_level_(level_),
     stream_(stream) { }
 
-  // print functions
+  // PRINT FUNCTIONS 
 
   // Prints up to a buffer of size 4196
-  void printf(Log_Level level, const char * format, ...) {
-    if(level <= level_) {
-      char buf[4196]; // TO DO : Think about this number
-      va_list arg;
-      va_start(arg, format);
-      (void)vsprintf(buf, format, arg);
-      va_end(arg);
-      stream_ << buf << '\n';
-    }
-  }
+  void printf(Log_Level level, const char * format, ...);
   // Strings
-  void printf(Log_Level level, const std::string& s) {
-    if(level <= level_) {
-      stream_ << s << '\n';
-    }
-  }
-
+  void printf(Log_Level level, const std::string& s);
   // Same as printf
-  void sprintf(Log_Level level, const char * format, ...) {
-    if(level <= level_) {
-      char buf[4196]; // TO DO : Think about this number
-      va_list arg;
-      va_start(arg, format);
-      (void)vsprintf(buf, format, arg);
-      va_end(arg);
-      stream_ << buf << '\n';
-    }
-  }
+  void sprintf(Log_Level level, const char * format, ...);
   // Strings
-  void sprintf(Log_Level level, const std::string& s) {
-    if(level <= level_) {
-      stream_ << s << '\n';
-    }
-  }
-
+  void sprintf(Log_Level level, const std::string& s);
   // Only print up to len char in format
-  void snprintf(Log_Level level, size_t len, const char * format, ...) {
-    if(level <= level_) {
-      char* buf = new char[len];
-      va_list arg;
-      va_start(arg, format);
-      vsnprintf(buf, len, format, arg);
-      va_end(arg);
-      stream_ << buf << '\n';
-      delete[] buf;
-    }
-  }
+  void snprintf(Log_Level level, size_t len, const char * format, ...);
 
-  // stream operators
+  // STREAMING
 
   // Template
   template <typename T>

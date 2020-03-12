@@ -2,14 +2,15 @@
 *
 *
 *  C++ Arbitrary Integer by Brandon Roberts
-*  Version 1.1 Update : Overhaul & Cleaning
+*  Version 1.2 Update : Static Librarified
 *
 *
 ***********************************************************
 
 ** Contains **
 --------------
-Harmony/arb_int/arb_int.h
+Harmony/math/arb_int/arb_int.h
+Harmony/math/arb_int/arb_int.cpp
 
 
 ** Ideas **
@@ -32,9 +33,9 @@ None
 ---------------
 If included in main.cpp:
   g++ -c main.cpp -I ~/workspace
-  g++ main.o -o main
+  g++ main.o -o main -L ~/workspace/Harmony/ -lharmony-math
 
-i.e. C++14
+i.e. C++14 & in Harmony's libharmony-math.a
 
 
 ** READ **

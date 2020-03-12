@@ -2,7 +2,7 @@
 *
 *
 *  Harmony C++ Library by Brandon Roberts
-*  Version 0.1 Update : Cleaned Complete & Naming Convention
+*  Version 0.2 Update : Static Librarified
 *
 *
 ***********************************************************
@@ -10,45 +10,59 @@
 ** PROJECTS **
 ---------------
 
-* Argument Parser - This is a argument parser object (python-esk) that will allow general 
-                      command line argument parsing
-                    Main object is : Parser
-                    #include "Harmony/arg_parser/template_version/arg_parser.h"
+  NOTE : Use / Change build.sh to compile full Harmony library into static library files
+
+  ** libharmony-basic.a **
+  ------------------------
+
+    * Argument Parser - A argument parser object (python-esk) that will allow general 
+                          command line argument parsing
+                        Main object is : Parser
+                        #include "Harmony/arg_parser/template_version/arg_parser.h"
 
 
-* Config File Reader - This is a config file reader that is able to read config file info into
-                         a map and then allow access to these config parameters in code
-                       2 Main objects are : Config_Reader & Parameter
-                       #include "Harmony/config_reader/config_reader.h"
+    * Config File Reader - A config file reader that is able to read config file info into
+                             a map and then allow access to these config parameters in code
+                           2 Main objects are : Config_Reader & Parameter
+                           #include "Harmony/config_reader/config_reader.h"
 
 
-* Level Logger - This is a logger object that allows log levels, so that one can change the 
-                   types of messages that get logged to a ostream object
-                 Main object is : Logger & Log_Level ( enum )
-                 #include "Harmony/logger/logger.h"
+    * Level Logger - A logger object that allows log levels, so that one can change the 
+                       types of messages that get logged to a ostream object
+                     Main object is : Logger & Log_Level ( enum )
+                     #include "Harmony/logger/logger.h"
+
+  
+  ** libharmony-math.a **
+  ---------------------
+
+    * Arbitrary Sized Integer - An integer that can be arbitrarily large ( takes 1byte per digit )
+                                Main object : Integer
+                                #include "Harmony/math/arb_int/arb_int.h"
 
 
-* Arbitrary Sized Integer - This is an integer that can be arbitrarily large ( takes 1byte per digit )
-                            Main object : Integer
-                            #include "Harmony/math/arb_int/arb_int.h"
+    * Rational - A class for a rational number ( keeps track of numerator & denominator as int )
+                 Main object : Rational
+                 #include "Harmony/math/rational/rational.h"
 
 
-* Rational - This is a class for a rational number ( keeps track of numerator & denominator as int )
-             Main object : Rational
-             #include "Harmony/math/rational/rational.h"
+  ** libharmony-sfml.a **
+  -----------------------
+    
+    * 2D Vector Visualizor - A family of functions to display a 2D vector w/ different visualfx
+                             Main Functions : linear_Range_Shader, make_Or_Break ( both w/ variants )
+                             Objects : Shader, default Shaders ( Jet_Shaders & Mono color variants )
+                             #include "Harmony/sfml/vector_visual/2D_vector_height.h"
 
 
-* 2D Vector Visualizor - This is a family of functions to display a 2D vector w/ different visualfx
-                         Main Functions : linear_Range_Shader, make_Or_Break ( both with variants )
-                         Objects : Shader, default Shaders ( Jet_Shaders & Mono_Shaders variants )
-                         #include "Harmony/sfml/vector_visual/2D_vector_height.h"
+    * GUI SFML - A header containing all the needs to create and run a gui in a seperate thread
+                 Main Objects : Gui, Background, Text_Display, Toggle_Button, Push_Button
+                 #include "Harmony/sfml/gui/gui.h"
 
+  ** UNFINISHED **
+  -----------------
 
-* GUI SFML - This is a header containing all the needs to create and run a gui in a seperate thread
-             Main Objects : Gui, Background, Text_Display, Toggle_Button, Push_Button
-             #include "Harmony/sfml/gui/gui.h"
-
-* UNFINISHED - thread_pool
+    * thread_pool
 
 NOTE : Each project has its own README that explains how to use and the implemetation 
        for the specific header files
@@ -56,14 +70,15 @@ NOTE : Each project has its own README that explains how to use and the implemet
 
 ** TO DO **
 -----------
-Make into cpp & headers? ( make into static library )
+Check all static librarys : make sure to check defaults
 Namespaces
 C++20
 Comment short circuits
+Forward Declare streams?
 
 ** Issues **
 ------------
-Issues in README's for specific projects
+Project specific issues in corresponding README's
 Search : TO\ DO for list of fixes and issues
 
 
@@ -81,7 +96,7 @@ All Header Files Compile Checked with :
   ( -Wno-exit-time-destructors : Arb int statics ONE and NEG_ONE require exit time destruction )
   ( -Wno-global-constructors : GUI color pairs and schemes need namespace )
   ( -Wno-missing-prototypes : 2D_vector_visual functions , is this really necessary? )
-  ( -Wno-c++98-c++11-c++14-compat -Wno-c++98-compat -Wno-padded : stupid warnings )
+  ( -Wno-c++98-c++11-c++14-compat -Wno-c++98-compat -Wno-padded : Unneccesary warnings )
  
 Note things I recommend, or think here ...
 
