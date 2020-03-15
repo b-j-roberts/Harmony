@@ -10,7 +10,7 @@
 ** PROJECTS **
 ---------------
 
-  NOTE : Use / Change build.sh to compile full Harmony library into static library files
+  NOTE : Use / Change Makefile to compile full Harmony library into static library files
 
   ** libharmony-basic.a **
   ------------------------
@@ -70,11 +70,12 @@ NOTE : Each project has its own README that explains how to use and the implemet
 
 ** TO DO **
 -----------
-Check all static librarys : make sure to check defaults
 Namespaces
 C++20
 Comment short circuits
 Forward Declare streams?
+Crossplatform build system
+std::begin & end replacements?
 
 ** Issues **
 ------------

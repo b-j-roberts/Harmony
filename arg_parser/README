@@ -16,6 +16,7 @@ Harmony/arg_parser/template_version/arg_parser.cpp
 ** Issues **
 ------------
 Listed as 'TO DO' in code
+Need to allow only flag ( like flags not needing value )
 
 
 ** Dependencies **

@@ -302,22 +302,26 @@ public:
 
   // Add Parts of GUI ( background , text display , push & toggle buttons )
 
+  // Helper : template alias for comparing if all decayed Args are of type T
+  template<typename T, typename... Args>
+  using all_same = std::conjunction<std::is_same<T, std::decay_t<Args>>...>;
+
   // params : Background, ...
   template<typename... Args,
-           typename = std::enable_if_t<std::conjunction_v<std::is_same<Background&, Args>...>> >
+           typename = std::enable_if_t<all_same<Background, Args...>::value> >
   void add_background(Args&&... args) {
     (backgrounds_.emplace(args(), std::move(args.pimpl_)), ...);
   }
   // params : Text_Display, ...
   template<typename... Args, 
-           typename = std::enable_if_t<std::conjunction_v<std::is_same<Text_Display&, Args>...>> >
+           typename = std::enable_if_t<all_same<Text_Display, Args...>::value> >
   void add_text(Args&&... args) {
     (args.pimpl_->GUI_sizing(font_), ...);
     (text_displays_.emplace(args(), std::move(args.pimpl_)), ...);
   }
   // params : Toggle_Button, ...
   template<typename... Args,
-           typename = std::enable_if_t<std::conjunction_v<std::is_same<Toggle_Button&, Args>...>> >
+           typename = std::enable_if_t<all_same<Toggle_Button, Args...>::value> >
   void add_toggle_button(Args&&... args) {
     (args.pimpl_->GUI_sizing(font_), ...);
     (toggle_buttons_.emplace(args(), std::move(args.pimpl_)), ...);
@@ -325,7 +329,7 @@ public:
   }
   // params : Toggle_Button, ... ( to be linked )
   template<typename... Args,
-           typename = std::enable_if_t<std::conjunction_v<std::is_same<Toggle_Button&, Args>...>> >
+           typename = std::enable_if_t<all_same<Toggle_Button, Args...>::value> >
   void add_linked_toggle(Args&&... args) {
     (args.pimpl_->GUI_sizing(font_), ...);
     (toggle_buttons_.emplace(args(), std::move(args.pimpl_)), ...);
@@ -336,7 +340,7 @@ public:
   }
   // params : Push_Button, ...
   template<typename... Args,
-           typename = std::enable_if_t<std::conjunction_v<std::is_same<Push_Button&, Args>...>> >
+           typename = std::enable_if_t<all_same<Push_Button, Args...>::value> >
   void add_push_button(Args&&... args) {
     update_lock_ = true;
     (args.pimpl_->GUI_sizing(font_), ...);

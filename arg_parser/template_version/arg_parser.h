@@ -78,7 +78,7 @@ public:
 
 template<typename T>
 void Parser::add_argument(const std::string& id, const std::string& name,
-                  const std::string& desc, bool required) {
+                          const std::string& desc, bool required) {
   // TO DO : Show type info ( make names readable )
   help_string_ += help_str_spaces + id + "   " + name + "   " + desc +
                  "  " + (required ? "(required)\n" : "(not required)\n");
