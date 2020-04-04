@@ -63,6 +63,8 @@ public:
   // Index configs_ map for Config_Reader
   // TO DO : Is this ever really needed ?
   const Config_Reader& config(const std::string& name) const;
+  // Return const& to configs_ ( for looping through )
+  const std::map<std::string, Config_Reader>& configs() const;
 
   // nested syntax : "conf_1::conf_2::conf_3::...::param_name"
   //   this indexing configs_ w/ key conf_1 => indexed Config_Reader's configs_ w/ key conf_2 => ...

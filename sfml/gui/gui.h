@@ -306,6 +306,7 @@ public:
   template<typename T, typename... Args>
   using all_same = std::conjunction<std::is_same<T, std::decay_t<Args>>...>;
 
+  // TO DO : Backgrounds drawing in wrong order
   // params : Background, ...
   template<typename... Args,
            typename = std::enable_if_t<all_same<Background, Args...>::value> >

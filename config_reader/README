@@ -16,6 +16,7 @@ Harmony/config_reader/config_reader.cpp
 ** Isssues **
 -------------
 Listed as 'TO DO' in code
+Issue parsing nested brace pairs ( they dont get removed )
 
 
 ** Dependancies **
@@ -64,6 +65,9 @@ Config_Reader :
 
   To index contained Config Readers by key : 
       Config_Reader config(string conf_key)
+
+  To get const& to all nested configs ( map ) :
+      const std::map<std::string, Config_Reader>& configs()
 
   To index Parameters by key ( using nested syntax, see: READ ) : 
       Parameter param(string param_key)

@@ -125,6 +125,10 @@ const Config_Reader& Config_Reader::config(const std::string& name) const {
   }
 }
 
+const std::map<std::string, Config_Reader>& Config_Reader::configs() const {
+  return configs_;
+}
+
 bool Config_Reader::has_param(const std::string& name) const {
   // Uses functionality of param(name) to determine if accessable w/ nested syntax
   try { (void) param(name); } catch(...) { return false; }
