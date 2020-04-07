@@ -1,0 +1,147 @@
+# HARMONY
+## C++ Static Libraries
+### v0.2 : Static Librar-ified
+### by Brandon Roberts
+
+
+## **Libraries**
+
+NOTE : More info on classes/interfaces and how to use them in header specific README.mkd
+
+NOTE : Use `make` to compile full library
+
+---
+
+## Harmony Basic Library ( *libharmony-basic.a* )
+
+
+### Argument Parser
+A argument parser object (python-esk) that will allow general command line argument parsing.
+
+##### Main Object :
+* Parser
+
+`#include "Harmony/arg_parser/template_version/arg_parser.h"`
+
+
+### Config File Reader
+A config file reader that is able to read config file info into a map and then allow access to these config parameters in code
+
+##### Main Objects :
+* Config_Reader
+* Parameter
+
+`#include "Harmony/config_reader/config_reader.h"`
+
+
+### Level Logger
+A logger object that allows log levels, so that one can change the types of messages that get logged to a ostream object
+
+##### Main Objects :
+* Logger
+* Log_Level ( enum )
+
+`#include "Harmony/logger/logger.h"`
+
+
+---
+
+## Harmony Maths Library ( *libharmony-math.a* ) 
+
+### Arbitrary Sized Integer
+An integer that can be arbitrarily large ( takes 1byte per digit )
+
+##### Main Objects :
+* Integer
+
+
+`#include "Harmony/math/arb_integer/arb_int.h"`
+
+### Rational Number
+A class for a rational number ( keeps track of numerator & denominator as int )
+
+##### Main Objects :
+* Rational
+
+`#include "Harmony/math/rational/rational.h"`
+
+
+---
+
+## Harmony SFML-Based Library ( *libharmony-sfml.a* )
+
+### 2D Vector Visualizer
+A family of functions to display a 2D vector w/ different visual effects
+
+##### Main Functions ( each w/ diffent variants ) :
+* linear\_Range\_Shader
+* make\_Or\_Break
+
+##### Main Objects :
+* Shader ( virtual )
+* default Shaders
+  * Mono Color Shaders
+  * Jet Shaders
+
+`#include "Harmony/sfml/vector_visual/2D_vector_height.h"`
+
+
+### GUI Interface for SFML
+A header containing all the needs to create and run a gui in a seperate thread
+
+##### Main Objects :
+* Gui
+* Background
+* Text_Display
+* Toggle_Button
+* Push_Button
+  
+`#include "Harmony/sfml/gui/gui.h"`
+
+---
+
+### Unfinished
+* Thread Pool ( *./thread_pool* )
+
+
+### TO DO
+* Namespaces
+* C++20
+* Comment short circuits
+* Forward Declare streams?
+* Crossplatform build system
+* std::begin and end replacement
+* map to unordered_map?
+
+
+### Issues
+Project specific issues in corresponding README's
+
+Search `TO\ DO` for list of fixes, issues, and small bugs
+
+
+### Ideas
+* Somekind of functions library with :
+  * void minmax(&x, min, max) { x = std::max(x, min); x = std::min(x, max); }
+* 2D Function visualizer
+* See file `./future_ideas` for more ideas and things for this library
+
+### MISC Notes
+##### Library object files compile checked with :
+* g++ -c test.cpp -Wall -Wextra -Wpedantic -std=c++1z -Wno-unused-variable
+  * **-Wno-unused-variable** : GUI structured bindings with unused key
+
+* clang++ -c test.cpp -Weverything -Wextra -Wpedantic -std=c++1z -Wno-c++98-c++11-c++14-compat -Wno-c++98-compat -Wno-padded -Wno-global-constructors -Wno-missing-prototypes -Wno-exit-time-destructors -Wno-format-nonliteral
+  * **-Wno-format-nonliteral** : logger format string issue
+  * **-Wno-exit-time-destructors** : Arb int statics ONE and NEG_ONE require exit time destruction
+  * **-Wno-global-constructors** : GUI color pairs and schemes need namespace
+  * **-Wno-missing-prototypes** : 2D\_vector\_visual functions , is this really necessary?
+  * **-Wno-c++98-c++11-c++14-compat -Wno-c++98-compat -Wno-padded** : Unneccesary warnings
+
+##### Naming Conventions :
+##### *NOTE : These only apply to interface level things ( helpers dont count here )*
+* **Directory/Filenames** : all lowercase, '_' to seperate words
+* **Classes** : 1st letter of each word uppercase, '_' to seperate words
+* **Member Variables** : all lowercase, '_' to seperate words, '_' at end
+* **Member Functions** : all lowercase, '_' to sererate words
+* **Functions** : 1st words lowercase, following w/ capital 1st letter, '_' to separate words
