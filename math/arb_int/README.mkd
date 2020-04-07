@@ -1,0 +1,47 @@
+# Arbitrarly Large Integer
+## v1.2 : Static Librar-ified
+### Harmony's Math Library ( *libharmony-basic.a* )
+### by Brandon Roberts
+
+This is an integer that can be arbitrarily large (taking 1 byte per digit); thus representing ZZ space
+
+---
+
+### Contains :
+* `Harmony/math/arb_int/arb_int.h`
+* `Harmony/math/arb_int/arb_int.cpp`
+
+---
+
+### How to use :
+
+#### Compiling :
+If included in `main.cpp`
+
+1. use `g++ -c main.cpp -I ~/workspace` to compile
+2. use `g++ main.o -o main -L ~/workspace/Harmony/ -lharmony-math` to link
+
+##### Dependencies :
+* C++14
+
+#### Interface :
+* **Integer** :
+  * **Construction** :
+    * `Integer name{}` -- `Integer` with value 0
+    * `Integer name(int num)` -- `Integer` with value from integral type
+    * `Integer name(string s)` -- `Integer` with value corresponding to integral string passed in
+  * **# of Digits** :
+    * `size_t length()` -- returns length of number ( ie # of digits )
+  * **Allowed Operators** :
+    * `+`, `-`, `*`
+    * `+=`, `-=`, `*=`
+    * `++`, `--` ( pre and post )
+    * `==`, `!=`, `<`, `>`, `<=`, `>=`
+    * `<<` ( streaming number to outstream )
+
+---
+
+### Issues & Ideas :
+* Listed as `TO\ DO` in code
+* Exit-time destructor for `ONE` and `NEG_ONE` statics ( `-Wexit-time-destructors` )
+* Add `%` and `/` operators

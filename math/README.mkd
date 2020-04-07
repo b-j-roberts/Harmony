@@ -1,0 +1,4 @@
+# Harmony's Math Library ( *libharmony-math.a* )
+## by Brandon Roberts
+
+#### See specific directory for more details on how to use them

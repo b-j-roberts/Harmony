@@ -1,0 +1,47 @@
+# Rational Number
+## v1.2 : Static Librar-ified
+### Harmony's Math Library ( *libharmony-basic.a* )
+### by Brandon Roberts
+
+This is a class for Rational number ( whos numerator and denominator are stored as int, but kept positive after `reduce()` )
+
+---
+
+### Contains :
+* `Harmony/math/rational/rational.h`
+* `Harmony/math/rational/rational.cpp`
+
+---
+
+### How to use :
+
+#### Compiling :
+If included in `main.cpp`
+
+1. use `g++ -c main.cpp -I ~/workspace -std=c++1z` to compile
+2. use `g++ main.o -o main -L ~/workspace/Harmony/ -lharmony-math` to link
+
+##### Dependencies :
+* C++17
+
+#### Interface :
+
+**NOTE** : The number will be reduced after any calculation, so there is never worry of having an unreduced num
+
+* **Rational** :
+  * **Construction** :
+    * `Rational name{}` -- `Rational` with value 0 / 1
+    * `Rational name(int num, int denom = 1)` -- `Rational` with value `num / denom`
+  * **Allowed Operators** :
+    * `+`, `-`, `*`, `/`
+    * `+=`, `-=`, `*=`, `/=`
+    * `++`, `--` ( pre and post, increment by 1 )
+    * `==`, `!=`, `<`, `>`, `<=`, `>=`
+    * `<<` ( streaming number to outstream, if `denom == 1` then only outputs `num`)
+    
+---
+
+### Issues & Ideas :
+* Listed as `TO\ DO` in code
+* Add unsigned int version to increase number of possible numbers (this will decrease efficiency on adding and subtracting numbers of different & opposite signs respectively)
+* Add an arb int version

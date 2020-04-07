@@ -30,6 +30,7 @@ If included in `main.cpp`
   * WARN
   * INFO
   * DEBUG
+
 **EX** : `Log_Level::DEBUG`
 
 * **Logger** :
