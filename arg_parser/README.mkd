@@ -66,10 +66,14 @@ File `main.cpp`
   }
 ```
 `g++ -c main.cpp -I ~/workspace -std=c++1z`
+
 `g++ main.o -o main -L ~/workspace/Harmony/ -lharmony-basic`
+
 `./main -p 0.13 // ERROR : No -x or --xtra flag, which is required`
+
 `./main -x 13 -p 0.124 --word hello`
-Output :
+
+**Output** :
 ```
 13
 0.124

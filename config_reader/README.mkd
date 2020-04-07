@@ -1,0 +1,148 @@
+# Configuration File Reader
+## v1.2 : Static Librar-ified
+### Harmony's Basic Library ( *libharmony-basic.a* )
+### by Brandon Roberts
+
+This loads config settings designated in a passed file; loads all as strings and the value will be accessable by calling one of the as\_\* functions
+
+---
+
+### Contains :
+* `Harmony/config\_reader/config\_reader.h`
+* `Harmony/config\_reader/config\_reader.cpp`
+
+---
+
+### How to use :
+
+#### Compiling :
+If included in `main.cpp`
+
+1. use `g++ -c main.cpp -I ~/workspace` to compile
+2. use `g++ main.o -o main -L ~/workspace/Harmony/ -lharmony-basic` to link
+
+##### Dependencies :
+* C++11
+* Boost ( *boost/lexical_cast.hpp* )
+
+#### Setting up Config File :
+* Use newlines to seperate Config\_Readers and Parameters
+* **key**-*value* pairs separated by `:`
+* Config\_Reader *value* if encased like `{ ... }`
+* Parameter *value* otherwise
+
+#### Interface :
+* **Config\_Reader** :
+**NOTE** : Contains a list of Config\_Readers and Parameters
+  * **Construction** :
+    * `Config_Reader reader_name(string config_filename/path)`
+  * **Check if nested Reader / Parameter Exists** :
+    * member function : `bool has_config(string conf_name)`
+    * member function : `bool has_param(string param_name)`
+  * **Get nested Reader / Parameter** :
+    * member function : `Config_Reader config(string conf_key)`
+    * member function : `Parameter param(string param_key)`
+    * member operator : `Parameter operator[](string param_key)`
+  * **Get map of key - inner Config\_Reader pairs** :
+    * member function : `const std::map<std::string, Config_Reader>& configs()`
+
+* **Parameter** :
+**NOTE** : Stores value as string, but allows access as different types
+  * **Get Parameter's Value** :
+    * member functions : `int as_int()`, `int as_int(int base)`, `double as_double()`, `float as_float()`, `string as_string()`
+    * template member function : `as<Type>()` **NOTE** : Uses boost's lexical\_cast
+    * member function : `vector<Parameter> as_vector()` **NOTE** : splits `Parameter` string on comma
+    * member function : `map<string, Parameter> as_map()` **NOTE** : splits key-value pairs by `:` and map entries on `,`
+
+#### Nested Parameter Syntax : `conf_1::conf_2::...::param_name`
+If a parameter is nested multiple Config\_Readers deep you can use this syntax for `param\_key` to access w/o getting intermitten Config\_Readers
+
+this indexing configs w/ key conf\_1 => indexed Config\_Reader's configs w/ key conf\_2 => ... till last param\_name which indexes last Config\_Reader's params_ w/ key param_name
+
+i.e. using `config\_name.param(conf\_1::conf\_2::param\_name);` is the same as `config\_name.config(conf\_1).config(conf\_2).param(param\_name);`
+
+#### Example
+Config File `Config.conf`
+```
+  information: {
+
+    cats: [ sam, bethany, tony ]
+    hats: ( big : 100, med : 10, small : 1 )
+
+    dog: ruffis
+    Ignored line bc doesnt have colon character
+
+    house: {
+
+      bedroom : 4
+
+      bathroom : 2
+
+    }
+
+  }
+
+  info: {
+
+    time: 15:00:00
+
+  }
+```
+
+**This will load** :
+
+* 2 Config\_Readers with keys `information` and `info`
+   * `information` contains :
+     * 3 Parameters with keys `cats`, `hats`, and `dog`
+     * 1 Config_Reader with key `house` ( which has nested Parameters `bedroom` and `bathroom`
+   * `info` contains :
+     * 1 Parameter with key `time`
+
+File `main.cpp`
+```cpp
+  #include "Harmony/config-reader/config_reader.h"
+  #include <iostream> // cout
+
+  int main() {
+
+    Config_Reader config("config.conf");
+
+    std::cout << config["information::dog"].as_string() << "\n";
+    if(config.has_param("information:house:bedroom"))
+      std::cout << config["information:house:bedroom"].as_int() << "\n";
+    if(config.has_param("information::bloop")) std::cout << "bloop\n";
+    else std::cout << "Bleep\n";
+
+    if(config.has_config("info")) { std::cout << "has info\n"; }
+    if(config.has_config("dog")) { std::cout << "has dog\n"; }
+
+    for(const auto& cat : config["information::cats"].as_vector()) {
+      std::cout << cat.as_string() << "|";
+    }
+    std::cout << std::endl;
+
+    std::cout << config["information::hats"].as_map()["med"].as<int>() << std::endl;
+  }
+```
+
+`g++ -c main.cpp -I ~/workspace`
+
+`g++ main.o -o main -L ~/workspace/Harmony/ -lharmony-basic`
+
+`./main`
+
+**Output** :
+```
+ruffis
+4
+Bleep
+has info
+sam|bethany|tony|
+10
+```
+
+---
+
+### Issues & Ideas :
+* Search : `TO\ DO` in code
+* Issue parsing nested bracers ( they dont get removed )
