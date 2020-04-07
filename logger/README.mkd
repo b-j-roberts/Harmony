@@ -1,0 +1,52 @@
+# Level Logger
+## v1.2 : Static Librar-ified
+### Harmony's Basic Library ( *libharmony-basic.a* )
+### by Brandon Roberts
+
+This is a leveled logger, ie it will only output messages that are at or "below" the log level specified in the constructor
+
+---
+
+### Contains :
+* `Harmony/logger/logger.h`
+* `Harmony/logger/logger.cpp`
+
+---
+
+### How to use :
+
+#### Compiling :
+If included in `main.cpp`
+
+1. use `g++ -c main.cpp -I ~/workspace` to compile
+2. use `g++ main.o -o main -L ~/workspace/Harmony/ -lharmony-basic` to link
+
+##### Dependencies :
+* C++11
+
+#### Interface :
+* **Log_Level** ( enum ) :
+  * FATAL
+  * WARN
+  * INFO
+  * DEBUG
+**EX** : `Log_Level::DEBUG`
+
+* **Logger** :
+  * **Construction** :
+    * `Logger logger_name(ostream& output_stream, Log_Level level = INFO)`
+    * level = level to output anything less than or equal to ( above or at on Log\_Level chart )
+  * **Printing** :
+    * member func : `printf(Log_Level level, char * format, ...)`
+    * member func : `sprintf(Log_Level level, char * format, ...)`
+    * member func : `printf(Log_Level level, string s)`
+    * member func : `sprintf(Log_Level level, string s)`
+    * member func : `snprintf(Log_Level level, size_t len, char * format, ...)`
+    * Stream op : `Logger& operator<<(/* Streamable object */)`
+    
+**NOTE** : Decides to output streamable object if `stream_level` is at or less that Logger's level ( passed in construction ). You set the `stream_level` by using the Stream operator `<<` into the logger with a `Log_Level`. **EX** : `logger_name << Log_Level::WARN << "cats"` will only stream "cats" ( & all future objects until `stream_level` changes ) if `logger_name`'s constructed `Log_Level` is `WARN` or below ( ie `WARN`, `INFO`, `DEBUG` )
+
+---
+
+### Issues & Ideas :
+* Search : `TO\ DO` in code

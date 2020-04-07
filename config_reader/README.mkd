@@ -8,8 +8,8 @@ This loads config settings designated in a passed file; loads all as strings and
 ---
 
 ### Contains :
-* `Harmony/config\_reader/config\_reader.h`
-* `Harmony/config\_reader/config\_reader.cpp`
+* `Harmony/config_reader/config_reader.h`
+* `Harmony/config_reader/config_reader.cpp`
 
 ---
 
@@ -33,6 +33,7 @@ If included in `main.cpp`
 
 #### Interface :
 * **Config\_Reader** :
+
 **NOTE** : Contains a list of Config\_Readers and Parameters
   * **Construction** :
     * `Config_Reader reader_name(string config_filename/path)`
@@ -55,11 +56,11 @@ If included in `main.cpp`
     * member function : `map<string, Parameter> as_map()` **NOTE** : splits key-value pairs by `:` and map entries on `,`
 
 #### Nested Parameter Syntax : `conf_1::conf_2::...::param_name`
-If a parameter is nested multiple Config\_Readers deep you can use this syntax for `param\_key` to access w/o getting intermitten Config\_Readers
+If a parameter is nested multiple Config\_Readers deep you can use this syntax for `param_key` to access w/o getting intermitten Config\_Readers
 
-this indexing configs w/ key conf\_1 => indexed Config\_Reader's configs w/ key conf\_2 => ... till last param\_name which indexes last Config\_Reader's params_ w/ key param_name
+this is indexing configs w/ key `conf_1` => indexed Config\_Reader's configs w/ key `conf_2` => ... till last `param_name` which indexes last Config\_Reader's params_ w/ key `param_name`
 
-i.e. using `config\_name.param(conf\_1::conf\_2::param\_name);` is the same as `config\_name.config(conf\_1).config(conf\_2).param(param\_name);`
+i.e. using `config_name.param(conf_1::conf_2::param_name);` is the same as `config_name.config(conf_1).config(conf_2).param(param_name);`
 
 #### Example
 Config File `Config.conf`
@@ -108,8 +109,8 @@ File `main.cpp`
     Config_Reader config("config.conf");
 
     std::cout << config["information::dog"].as_string() << "\n";
-    if(config.has_param("information:house:bedroom"))
-      std::cout << config["information:house:bedroom"].as_int() << "\n";
+    if(config.has_param("information::house::bedroom"))
+      std::cout << config["information::house::bedroom"].as_int() << "\n";
     if(config.has_param("information::bloop")) std::cout << "bloop\n";
     else std::cout << "Bleep\n";
 
