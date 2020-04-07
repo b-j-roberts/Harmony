@@ -1,0 +1,84 @@
+# Python-esk Argument Parser
+## v1.2 : Static Librar-ified
+### Harmony's Basic Library ( *libharmony-basic.a* )
+### by Brandon Roberts
+
+This is a general template-based command line argument parser, highly inspired by python's arg\_parser
+
+---
+
+### Contains :
+* `Harmony/arg\_parser/template\_version/arg\_parser.h`
+* `Harmony/arg\_parser/template\_version/arg\_parser.cpp`
+
+---
+
+### How to use :
+
+#### Compiling :
+If included in `main.cpp`
+
+1. use `g++ -c main.cpp -I ~/workspace -std=c++1z` to compile
+2. use `g++ main.o -o main -L ~/workspace/Harmony/ -lharmony-basic` to link
+
+##### Dependencies :
+* C++17
+* Boost ( *boost/lexical_cast.hpp* )
+
+#### Interface :
+* **Parser** :
+  * **Construction** :
+    * `Parser parser_name(int argc, char** argv, std::string description = "")`
+    * argc = argument count , argv = argument array , desc = parser description (for help string)
+  * **Adding Arguments** :
+    * `parser_name.add_argument<type>(string id, string name, string description, bool required = false)`
+    * type = argument value type , id = id flag of arg (-), name = name flag of arg (-- & index), req = if argument is required
+  * **Check if Argument Exists** :
+    * `parser_name.has(string name)`
+    * name = name given in add\_argument
+    * **NOTE** : Returns true if argument was passed in and argument was in add\_argument
+  * **Get Argument Value** :
+    * `parser_name.get<type>(string name)`
+    * type = arguments type from add\_argument , name = name given in add\_argument
+
+#### Example
+File `main.cpp`
+```cpp
+  #include "Harmony/arg_parser/template_version/arg_parser.h"
+  #include <iostream> // cout
+
+  int main(int argc, char** argv) {
+
+    Parser parser(argc, argv, "This is an argument parser");
+
+    parser.add_argument<int>("-x", "--xtra", "This is the number of extras", true);
+    parser.add_argument<double>("-p", "--perc", "This is the percent of people");
+    parser.add_argument<std::string>("-w", "--word", "This is their favorite word");
+
+    std::cout << parser.get<int>("xtra") << '\n';
+    if(parser.has("perc") && parser.has("word")) {
+      std::cout << parser.get<double>("perc") << '\n';
+      std::cout << parser.get<std::string>("word") << '\n';
+    }
+
+    return 0;
+
+  }
+```
+`g++ -c main.cpp -I ~/workspace -std=c++1z`
+`g++ main.o -o main -L ~/workspace/Harmony/ -lharmony-basic`
+`./main -p 0.13 // ERROR : No -x or --xtra flag, which is required`
+`./main -x 13 -p 0.124 --word hello`
+Output :
+```
+13
+0.124
+hello
+```
+
+---
+
+### Issues & Ideas :
+* Search : `TO\ DO` in code
+* Need to allow only flag ( like flag without a value )
+* make not template version ( with as\_\* functions for retrieving )

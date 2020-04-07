@@ -128,10 +128,10 @@ Search `TO\ DO` for list of fixes, issues, and small bugs
 
 ### MISC Notes
 ##### Library object files compile checked with :
-* g++ -c test.cpp -Wall -Wextra -Wpedantic -std=c++1z -Wno-unused-variable
+* `g++ -c test.cpp -Wall -Wextra -Wpedantic -std=c++1z -Wno-unused-variable`
   * **-Wno-unused-variable** : GUI structured bindings with unused key
 
-* clang++ -c test.cpp -Weverything -Wextra -Wpedantic -std=c++1z -Wno-c++98-c++11-c++14-compat -Wno-c++98-compat -Wno-padded -Wno-global-constructors -Wno-missing-prototypes -Wno-exit-time-destructors -Wno-format-nonliteral
+* `clang++ -c test.cpp -Weverything -Wextra -Wpedantic -std=c++1z -Wno-c++98-c++11-c++14-compat -Wno-c++98-compat -Wno-padded -Wno-global-constructors -Wno-missing-prototypes -Wno-exit-time-destructors -Wno-format-nonliteral`
   * **-Wno-format-nonliteral** : logger format string issue
   * **-Wno-exit-time-destructors** : Arb int statics ONE and NEG_ONE require exit time destruction
   * **-Wno-global-constructors** : GUI color pairs and schemes need namespace
