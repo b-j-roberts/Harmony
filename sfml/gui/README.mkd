@@ -195,3 +195,11 @@ File `demo.cpp`
 Output :
 
 ![DEMO VIDEO](https://github.com/b-j-roberts/Harmony/raw/master/demo/sfml/gui/Gui_Demo.gif)
+
+Some screencaps of projects I used this Gui on ( using base color scheme )
+
+![DEMO VID](https://github.com/b-j-roberts/Projects/raw/master/demos/k_nearest_neighbors/mode_persistence_screencap.gif)
+
+![DEMO VID](https://github.com/b-j-roberts/Projects/raw/master/demos/charged_particles/explosion_charged_screencap.gif)
+
+![DEMO VID](https://github.com/b-j-roberts/Projects/raw/master/demos/notecards/notecard_demo_screencap.gif)
