@@ -73,6 +73,8 @@ A class for a rational number ( keeps track of numerator & denominator as int )
 ### 2D Vector Visualizer
 A family of functions to display a 2D vector w/ different visual effects
 
+<img src="https://github.com/b-j-roberts/Harmony/raw/master/demo/sfml/vector_visual/linear_2.png" alt="Vector Visual 2" width="800" height="800"/>
+
 ##### Main Functions ( each w/ diffent variants ) :
 * linear\_Range\_Shader
 * make\_Or\_Break
@@ -88,6 +90,8 @@ A family of functions to display a 2D vector w/ different visual effects
 
 ### GUI Interface for SFML
 A header containing all the needs to create and run a gui in a seperate thread
+
+![DEMO VIDEO](https://github.com/b-j-roberts/Harmony/raw/master/demo/sfml/gui/Gui_Demo.gif)
 
 ##### Main Objects :
 * Gui
