@@ -13,6 +13,6 @@
 
 
 #### vector visualizer
-<img src="https://github.com/b-j-roberts/Harmony/raw/master/demo/vector_visual/linear_3.png" alt="Linear Shader Visual" width="800" height="700"/>
-<img src="https://github.com/b-j-roberts/Harmony/raw/master/demo/vector_visual/linear_4.png" alt="Linear Shader Visual" width="800" height="700"/>
-<img src="https://github.com/b-j-roberts/Harmony/raw/master/demo/vector_visual/linear_5.png" alt="Linear Shader Visual" width="800" height="700"/>
+<img src="https://github.com/b-j-roberts/Harmony/raw/master/demo/sfml/vector_visual/linear_3.png" alt="Linear Shader Visual" width="800" height="700"/>
+<img src="https://github.com/b-j-roberts/Harmony/raw/master/demo/sfml/vector_visual/linear_4.png" alt="Linear Shader Visual" width="800" height="700"/>
+<img src="https://github.com/b-j-roberts/Harmony/raw/master/demo/sfml/vector_visual/linear_5.png" alt="Linear Shader Visual" width="800" height="700"/>
