@@ -1,0 +1,18 @@
+# Harmony's SFML Library ( *libharmony-sfml.a* )
+## by Brandon Roberts
+
+#### Objects & Functions related to SFML / using SFML
+#### See specific directory for more details on how to use them
+
+---
+
+### Some Screencaps
+
+#### gui
+![DEMO VIDEO](https://github.com/b-j-roberts/Harmony/raw/master/demo/sfml/gui/Gui_Demo.gif)
+
+
+#### vector visualizer
+<img src="https://github.com/b-j-roberts/Harmony/raw/master/demo/vector_visual/linear_3.png" alt="Linear Shader Visual" width="800" height="700"/>
+<img src="https://github.com/b-j-roberts/Harmony/raw/master/demo/vector_visual/linear_4.png" alt="Linear Shader Visual" width="800" height="700"/>
+<img src="https://github.com/b-j-roberts/Harmony/raw/master/demo/vector_visual/linear_5.png" alt="Linear Shader Visual" width="800" height="700"/>

@@ -1,4 +1,4 @@
-# Arbitrarly Large Integer
+# Arbitrarily Large Integer
 ## v1.2 : Static Librar-ified
 ### Harmony's Math Library ( *libharmony-basic.a* )
 ### by Brandon Roberts
