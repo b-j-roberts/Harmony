@@ -98,19 +98,19 @@ to compile. ( Note : Uses C++20 for for-loop initialization in get_Vector())
 
 **Linear Shader**
 1. `vec[y][x] = x * y` ( scaled to 0.f -- 1.f ) ( Shader - `Jet_Shader()` )
-<img src="https://github.com/b-j-roberts/Pointless-Quest/raw/master/demo/sfml/vector_visual/linear_1.png" alt="Vector Visual 1" width="800" height="800"/>
+<img src="https://github.com/b-j-roberts/Harmony/raw/master/demo/sfml/vector_visual/linear_1.png" alt="Vector Visual 1" width="800" height="800"/>
 2. `vec[y][x] = sin(x^2 + y^2) / 10.f` ( drawn on -.1f -- .1f ) ( Shader - `Jet_Shader()` )
-<img src="https://github.com/b-j-roberts/Pointless-Quest/raw/master/demo/sfml/vector_visual/linear_2.png" alt="Vector Visual 2" width="800" height="800"/>
+<img src="https://github.com/b-j-roberts/Harmony/raw/master/demo/sfml/vector_visual/linear_2.png" alt="Vector Visual 2" width="800" height="800"/>
 3. `vec[y][x] = sin(x) * cos(y) / 10.f` ( drawn on -.25f -- .25f, shifted x & y to center of window ) ( Shader - `Jet_Shader()` )
-<img src="https://github.com/b-j-roberts/Pointless-Quest/raw/master/demo/sfml/vector_visual/linear_3.png" alt="Vector Visual 3" width="800" height="800"/>
+<img src="https://github.com/b-j-roberts/Harmony/raw/master/demo/sfml/vector_visual/linear_3.png" alt="Vector Visual 3" width="800" height="800"/>
 4. Same as (3) with `mesh_size = 10` on `Mesh` ( Shader - `Grayscale_Shader()` )
-<img src="https://github.com/b-j-roberts/Pointless-Quest/raw/master/demo/sfml/vector_visual/linear_4.png" alt="Vector Visual 4" width="800" height="800"/>
+<img src="https://github.com/b-j-roberts/Harmony/raw/master/demo/sfml/vector_visual/linear_4.png" alt="Vector Visual 4" width="800" height="800"/>
 5. `cos^2(x) + cos^2(y)` ( drawn on 0.f -- 2.f, with `mesh_size = 10` on `Dots` ) ( Shader - `Purple_Shader()` )
-<img src="https://github.com/b-j-roberts/Pointless-Quest/raw/master/demo/sfml/vector_visual/linear_5.png" alt="Vector Visual 5" width="800" height="800"/>
+<img src="https://github.com/b-j-roberts/Harmony/raw/master/demo/sfml/vector_visual/linear_5.png" alt="Vector Visual 5" width="800" height="800"/>
 
 **Make or Break**
 1. `vec[y][x] = x * y` ( scaled to 0.f -- 1.f, `break_val` set to .15f )
-<img src="https://github.com/b-j-roberts/Pointless-Quest/raw/master/demo/sfml/vector_visual/make_or_break_1.png" alt="Make Break Visual" width="800" height="800"/>
+<img src="https://github.com/b-j-roberts/Harmony/raw/master/demo/sfml/vector_visual/make_or_break_1.png" alt="Make Break Visual" width="800" height="800"/>
 
 ---
 
