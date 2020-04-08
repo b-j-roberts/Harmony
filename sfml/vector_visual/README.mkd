@@ -1,0 +1,119 @@
+# 2D Vector - Height Visualizer
+## v1.2 : Static Librar-ified
+### Harmony's SFML Library ( *libharmony-sfml.a* )
+### by Brandon Roberts
+
+This is an SFML vector height visualizer that will, based on the shader & function picked, display the vector heights on a window as various colors.
+
+---
+
+### Contains :
+* `Harmony/sfml/vector_visual/2D_vector_height.h`
+* `Harmony/sfml/vector_visual/2D_vector_height.cpp`
+* `Harmony/sfml/vector_visual/visualizer.cpp` ( demo code ready to be used - if inserting vector )
+
+---
+
+### How to use :
+
+#### Compiling :
+If included in `main.cpp`
+
+1. use `g++ -c main.cpp -I ~/workspace` to compile
+2. use `g++ main.o -o main -L ~/workspace/Harmony/ -lharmony-sfml -lsfml-graphics -lsfml-window -lsfml-system` to link
+
+##### Dependencies :
+* C++11
+* SFML
+
+#### Interface :
+* **Custom Shaders** :
+  * Publically inherit from Shader & create a public function with signature : `sf::Color color(float shift) const override;`
+  * This function should return a color based on a given shift value ranging from 0.f - 1.f
+  * **EX**:
+  ```cpp
+    class Red_Shader : public Shader {
+      public:
+      sf::Color color(float shift) const override {
+        return sf::Color(static_cast<unsigned char>(shift * 255), 0, 0);
+      }
+    };
+  ```
+
+* **Built-in Shaders** :
+  * Mono-Shaders
+    * `Red_Shader`
+    * `Green_Shader`
+    * `Blue_Shader`
+    * `Yellow_Shader`
+    * `Purple_Shader`
+    * `Cyan_Shader`
+    * `Grayscale_Shader`
+  * Jet-Shaders ( inspired by Matlab Jet colormap )
+    * `Jet_BTR_Shader` - Blue to Red shift ( traditional colormap )
+    * `Jet_RTB_Shader` - Red to Blue shift
+    * `Jet_BTG_Shader` - Blue to Green shift
+    * `Jet_GTB_Shader` - Green to Blue shift
+    * `Jet_GTR_Shader` - Green to Red shift
+    * `Jet_RTG_Shader` - Red to Green shift
+    * `Jet_Shader` - Alias for traditional `Jet_BTR_Shader`
+
+* **Visualization Functions** :
+  * **Linear Range Shader** :
+    * `linear_Range_Shader_Impl(window, vector, shader, range_min, range_max, bool condition(int, int))`
+      * Draws `vector` to `window` with `shader` ( linearly interpolated such that `range_min` corresponds to 0.f and `range_max` to 1.f for the shader )
+      * It only draws pixel `vector[y][x]` at (x , y) if `bool conditional(y, x)` returns true
+      * Thus this allows creating custom Linear Range Shader Functions ( like base one's implimented, ie regular, mesh, and dots )
+    * `linear_Range_Shader(window, vector, shader, range_min=0.f, range_max=1.f)`
+      * `linear_Range_Shader_Impl` with default values for range and `condition` function always returning `true`
+    * `linear_Range_Shader_Mesh(window, vector, shader, mesh_size=5, range_min=0.f, range_max=1.f)`
+      * `linear_Range_Shader_Impl` with default values for range and `condition` function returning true if `x % mesh_size == 0 || y % mesh_size == 0`
+      * Thus creating a mesh with gaps equal to `mesh_size`
+    * `linear_Range_Shader_Dots(window, vector, shader, mesh_size=5, range_min=0.f, range_max=1.f)`
+      * `linear_Range_Shader_Impl` with default values for range and `condition` function returning true if `x % mesh_size == 0 && y % mesh_size == 0`
+      * Thus creating a dots with gaps equal to `mesh_size`
+    * **EX** : `linear_Range_Shader(window, vec, Blue_Shader(), -.5, .5);`
+
+  * **Make or Break Shader** :
+    * `make_Or_Break_Impl(window, vector, color, bool condition(float))`
+      * Draws `vector` to `window` only on points `vector[y][x]` such that `condition(vector[y][x])` is `true`, drawing that point as `color` (sfml based color)
+    * `make_Or_Break(window, vector, float break_val, color)`
+      * `make_Or_Break_Impl` with `condition(vector[y][x])` true if `vector[y][x] >= break_val` ( only draw points above threshhold )
+    * `make_Or_Break_Range(window, vector, float break_min, float break_max, color)`
+      * `make_Or_Break_Impl` with `condition(vector[y][x])` true if `vector[y][x] >= break_min && vector[y][x] <= break_max` ( only draw points within break range )
+    * **EX** : `make_Or_Break(window, vec, .5, sf::Color::Green);`
+
+#### Example
+See `visualize.cpp` for examples! Comment out all Visualization functions except the # you want to use and uncomment the `get_Vector()` function for the corresponding number.
+
+Use :
+
+`clang++-9 -c visualize.cpp -std=c++2a`
+
+`clang++-9 visualize.o 2D_vector_height.o -o visualize -lsfml-graphics -lsfml-system -lsfml-window`
+
+to compile. ( Note : Uses C++20 for for-loop initialization in get_Vector())
+
+#### Visuals ( from `visualize.cpp` )
+
+**Linear Shader**
+1. `vec[y][x] = x * y` ( scaled to 0.f -- 1.f ) ( Shader - `Jet_Shader()` )
+<img src="https://github.com/b-j-roberts/Pointless-Quest/raw/master/demo/sfml/vector_visual/linear_1.png" alt="Vector Visual 1" width="800" height="800"/>
+2. `vec[y][x] = sin(x^2 + y^2) / 10.f` ( drawn on -.1f -- .1f ) ( Shader - `Jet_Shader()` )
+<img src="https://github.com/b-j-roberts/Pointless-Quest/raw/master/demo/sfml/vector_visual/linear_2.png" alt="Vector Visual 2" width="800" height="800"/>
+3. `vec[y][x] = sin(x) * cos(y) / 10.f` ( drawn on -.25f -- .25f, shifted x & y to center of window ) ( Shader - `Jet_Shader()` )
+<img src="https://github.com/b-j-roberts/Pointless-Quest/raw/master/demo/sfml/vector_visual/linear_3.png" alt="Vector Visual 3" width="800" height="800"/>
+4. Same as (3) with `mesh_size = 10` on `Mesh` ( Shader - `Grayscale_Shader()` )
+<img src="https://github.com/b-j-roberts/Pointless-Quest/raw/master/demo/sfml/vector_visual/linear_4.png" alt="Vector Visual 4" width="800" height="800"/>
+5. `cos^2(x) + cos^2(y)` ( drawn on 0.f -- 2.f, with `mesh_size = 10` on `Dots` ) ( Shader - `Purple_Shader()` )
+<img src="https://github.com/b-j-roberts/Pointless-Quest/raw/master/demo/sfml/vector_visual/linear_5.png" alt="Vector Visual 5" width="800" height="800"/>
+
+**Make or Break**
+1. `vec[y][x] = x * y` ( scaled to 0.f -- 1.f, `break_val` set to .15f )
+<img src="https://github.com/b-j-roberts/Pointless-Quest/raw/master/demo/sfml/vector_visual/make_or_break_1.png" alt="Make Break Visual" width="800" height="800"/>
+
+---
+
+### Issues & Ideas :
+* Search : `TO\ DO` in code
+* see `look_into` file for future research ideas
