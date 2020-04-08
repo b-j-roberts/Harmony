@@ -1,0 +1,197 @@
+# GUI Library - Based in SFML
+## v1.2 : Static Librar-ified
+### Harmony's SFML Library ( *libharmony-sfml.a* )
+### by Brandon Roberts
+
+This is an SFML based gui that allows the dealing of clicks and updating button states in its own thread. Allows easy interface for creating and designing a Gui.
+
+---
+
+### Contains :
+* `Harmony/sfml/gui/gui.h`
+* `Harmony/sfml/gui/gui.cpp`
+
+---
+
+### How to use :
+
+#### Compiling :
+If included in `main.cpp`
+
+0. make sure to put `XInitThreads()` at top of `int main()`
+1. use `g++ -c main.cpp -I ~/workspace -std=c++1z` to compile
+2. use `g++ main.o -o main -pthread -lX11 -L ~/workspace/Harmony/ -lharmony-sfml -lsfml-graphics -lsfml-window -lsfml-system` to link
+
+##### Dependencies :
+* C++17
+* SFML
+* X11
+
+#### Interface :
+**NOTE** : Must include line `XInitThreads();` at the beginning of `int main()`
+
+* **Gui Elements** :
+  
+  **NOTE** : All elements are given unique index for indexing Gui's state of that element. So you only need to keep reference ( or at least get id ) from those you want
+             to know the state of. You get this id using `operator()` or member function `id()`
+
+  * **Background** :
+    * `Background(size_x, size_y, pos_x, pos_y (from top left), sf::Color = Base_Scheme.background_)`
+  * **Text Display** :
+    * `Text_Display(size_x, size_y, pos_x, pos_y (from top left), string label, sf::Color = Base_Scheme.background_)` Note : You can change text later
+  * **Toggle Button** : ( toggles state each time clicked )
+    * `Toggle_Button(size_x, size_y, pos_x, pos_y (from top left), sting label, begin_state = false, sf::Color active = default, sf::Color deactive = default)`
+    * `Toggle_Button(size_x, size_y, pos_x, pos_y (from top left), sting label, sf::Color active, sf::Color deactive)`
+    * `Toggle_Button(size_x, size_y, pos_x, pos_y (from top left), sting label, begin_state, pair<sf::Color, sf::Color> active_deactive_pair)`
+    * `Toggle_Button(size_x, size_y, pos_x, pos_y (from top left), sting label, pair<sf::Color, sf::Color> active_deactive_pair)`
+  * **Push Button** : ( true state once each time clicked, within sensitivity duration )
+    * `Push_Button(size_x, size_y, pos_x, pos_y (from top left), sting label, sf::Color active = default, sf::Color deactive = default)`
+    * `Push_Button(size_x, size_y, pos_x, pos_y (from top left), sting label, pair<sf::Color, sf::Color> active_deactive_pair)`
+
+
+* **Gui** :
+  * **Construction** :
+    * `GUI gui_name(const sf::RenderWindow&, sf::Font=default font);`
+    * Launches `gui_name`'s thread and sets font
+  * **Add Elements** :
+    * **Backgrounds** :           `gui_name.add_background(background_name_1, background_name_2, ...);`
+    * **Text Displays** :         `gui_name.add_text(text_display_name_1, text_display_name_2, ...);`
+    * **Toggle Buttons** :        `gui_name.add_toggle_button(toggle_button_name_1, toggle_button_2, ...);` 
+    * **Push Buttons** :          `gui_name.add_push_button(push_button_name_1, push_button_name_2);`
+    * **Linked Toggle Buttons** : `gui_name.add_linked_toggle(toggle_name_1, toggle_name_2, ...);` ( only 1 linked toggle on at a time )
+  * **Using Gui** :
+    * **Draw** : `gui_name.draw(sf::RenderWindow& window);` - draws GUI Elements to window
+    * **State** : `map<(size_t)gui_element_id, bool> gui_name.get_state();` - invalidates past maps returned from calls to this function
+      * Using state : `gui_state_map_returned[gui_element_name()]` or `gui_state_map_returned[gui_element_name.id()]` - true / false based on state
+    * **Text** :
+      * Get : `std::string get_text(id)` - returns the text inside a gui Text_Display w/ id
+      * Set : `void set_text(id, std::string text)` - sets text inside gui Text_Display w/ id ( & redos gui sizing )
+  * **Coloring Gui** :
+    
+    **NOTE** : Using any of these sets all repecting fields inside `gui_name`, so if you want specially colored elements I recommend setting overall color and then
+               use the specific elements contructors to do their colors before adding them into the Gui
+
+    * **Backgrounds** ( `Background` & `Text_Display` ) :
+      * `gui_name.set_background_color(sf::Color Background color, sf::Color Text_Display back color);`
+      * `gui_name.set_background_color(sf::Color Background color & Text_Display back color);` ( set to same color )
+    * **Text Color** :
+      * `gui_name.set_text_color(sf::Color);`
+    * **Button Colors** :
+      * `gui_name.set_button_color(sf::Color active color, sf::Color deactive color);`
+      * `gui_name.set_button_color(std::pair<sf::Color, sf::Color> active-deactive color pair);` ( see **Coloring** **active - deactive button pairs** )
+    * **Whole Scheme** :
+      * `gui_name.set_color_scheme(const GUI_Scheme&);`
+
+* **Coloring** :
+  * **active - deactive button pairs** :
+    * Button constructors ( and coloring functions ) can take a pair of sfml colors with `first` being active color and `second` being deactive
+    * Included pairs :
+      * `Black_White` - `first` - white & `second` - black
+      * `Halloween` - `first` - rgb(235, 97, 35) & `second` - black
+  * **Color Schemes**
+    * `Gui_Scheme` struct contains sfml color members `background_`, `text_background_`, `text_`, `button_active_`, `button_deactive_`, which allow you to set the entire
+      color scheme of the Gui in one go. These properties correspond to background color, text display background color, text color, button active color, and button
+      deactive color, respectively
+    * Included Schemes :
+      * `Base_Scheme` - Default Gui Scheme with properties, in order : rgb(211, 211, 211), rgb(211, 211, 211), black, rgb(144, 238, 144), rgb(255, 135, 132)
+      * `Halloween_Scheme` - with properties, in order : rgb(136, 30, 228), rgb(136, 30, 228), rgb(133, 226, 31), rgb(235, 97, 35), black 
+
+#### Example
+File `demo.cpp`
+```cpp
+  #include "gui.h"
+
+  int main() {
+    XInitThreads();
+
+    // SFML Window setup
+    const sf::Vector2u window_size(1000, 1000);
+    sf::RenderWindow window(sf::VideoMode(window_size.x, window_size.y), "Gui DEMO");
+    window.setFramerateLimit(60);
+
+    // SETUP GUI
+
+    // Color Scheme
+    sf::Color back = sf::Color(143, 224, 254);
+    sf::Color active = sf::Color(3, 137, 242);
+    sf::Color deactive = sf::Color(102, 146, 119);
+    sf::Color alt =  sf::Color(58, 133, 191);
+
+    // load font
+    sf::Font font;
+    if(!font.loadFromFile("/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf")) {
+      throw std::runtime_error("No font file :""/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf"
+                               " found!");
+    }
+
+    // Gui
+    Gui gui(window, font);
+
+    // Background
+    gui.add_background(Background(window_size.x, window_size.y, 0, 0, back));
+
+    // Push ( Temporary ) Buttons
+    Push_Button button_1(200, 200, 100, 100, "button_1", active, deactive);
+    Push_Button button_2(200, 200, 400, 100, "button_2", active, deactive);
+    gui.add_push_button(button_1, button_2);
+
+    // Toggle Button
+    Toggle_Button toggler(500, 200, 100, 400, "toggle", active, deactive);
+    gui.add_toggle_button(toggler);
+
+    // Linked Toggle Buttons
+    Toggle_Button linked_toggle_1(200, 200, 100, 700, "linked_1", true, active, deactive);
+    Toggle_Button linked_toggle_2(200, 200, 400, 700, "linked_2", active, deactive);
+    gui.add_linked_toggle(linked_toggle_1, linked_toggle_2);
+
+    // Text Displays
+    gui.add_text(Text_Display(200, 100, 700, 100, "Last Pressed", alt),
+                 Text_Display(200, 100, 700, 400, "Toggles State", alt),
+                 Text_Display(200, 100, 700, 700, "Linked One", alt));
+    Text_Display last_pressed(200, 100, 700, 200, "--", back);
+    Text_Display toggles_state(200, 100, 700, 500, "--", back);
+    Text_Display linked_one(200, 100, 700, 800, "1", back);
+    gui.add_text(last_pressed, toggles_state, linked_one);
+
+    sf::Event event;
+    while(window.isOpen()) {
+      while(window.pollEvent(event)) {
+        switch(event.type) {
+          case sf::Event::Closed:
+            window.close();
+            break;
+
+          default: break;
+        }
+      }
+
+      // USE GUI
+      auto state = gui.get_state();
+
+      if(state[button_1.id()]) { gui.set_text(last_pressed(), "1"); }
+      else if(state[button_2.id()]) { gui.set_text(last_pressed(), "2"); }
+
+      gui.set_text(toggles_state.id(), state.at(toggler.id()) ? "ON" : "OFF");
+
+      if(state[linked_toggle_1()]) { gui.set_text(linked_one(), "1"); }
+      else if(state[linked_toggle_2()]) { gui.set_text(linked_one(), "2"); }
+
+      window.clear();
+
+      // DRAW GUI
+      gui.draw(window);
+
+      window.display();
+    }
+  }
+```
+
+`g++ -c demo.cpp -std=c++1z`
+
+`g++ demo.o gui.o -o demo -pthread -lX11 -lsfml-graphics -lsfml-window -lsfml-system`
+
+`./demo`
+
+Output :
+
+![DEMO VIDEO](https://github.com/b-j-roberts/Harmony/raw/master/demo/sfml/gui/Gui_Demo.gif)
