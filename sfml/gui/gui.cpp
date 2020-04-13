@@ -102,7 +102,7 @@ Gui::Gui(const sf::RenderWindow& window, const sf::Font& font):
   gui_thread_ = std::thread(&Gui::gui_loop, this, std::cref(window));
   // Load default or passed font
   if(font.getInfo().family.empty()) {
-    if(!font_.loadFromFile("/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf")) {
+    if(!font_.loadFromFile("FreeMonoBold.ttf")) {
       throw std::runtime_error("No def file :""/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf"
                                " found!");
     }
