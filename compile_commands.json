@@ -1,0 +1,82 @@
+[
+    {
+        "arguments": [
+            "g++",
+            "-c",
+            "-o",
+            "math/arb_int/arb_int.o",
+            "math/arb_int/arb_int.cpp"
+        ],
+        "directory": "/home/brandon/workspace/Harmony",
+        "file": "math/arb_int/arb_int.cpp"
+    },
+    {
+        "arguments": [
+            "g++",
+            "-c",
+            "-std=c++1z",
+            "-o",
+            "math/rational/rational.o",
+            "math/rational/rational.cpp"
+        ],
+        "directory": "/home/brandon/workspace/Harmony",
+        "file": "math/rational/rational.cpp"
+    },
+    {
+        "arguments": [
+            "g++",
+            "-c",
+            "-o",
+            "logger/logger.o",
+            "logger/logger.cpp"
+        ],
+        "directory": "/home/brandon/workspace/Harmony",
+        "file": "logger/logger.cpp"
+    },
+    {
+        "arguments": [
+            "g++",
+            "-c",
+            "-std=c++1z",
+            "-o",
+            "sfml/gui/gui.o",
+            "sfml/gui/gui.cpp"
+        ],
+        "directory": "/home/brandon/workspace/Harmony",
+        "file": "sfml/gui/gui.cpp"
+    },
+    {
+        "arguments": [
+            "g++",
+            "-c",
+            "-std=c++1z",
+            "-o",
+            "arg_parser/template_version/arg_parser.o",
+            "arg_parser/template_version/arg_parser.cpp"
+        ],
+        "directory": "/home/brandon/workspace/Harmony",
+        "file": "arg_parser/template_version/arg_parser.cpp"
+    },
+    {
+        "arguments": [
+            "g++",
+            "-c",
+            "-o",
+            "sfml/vector_visual/2D_vector_height.o",
+            "sfml/vector_visual/2D_vector_height.cpp"
+        ],
+        "directory": "/home/brandon/workspace/Harmony",
+        "file": "sfml/vector_visual/2D_vector_height.cpp"
+    },
+    {
+        "arguments": [
+            "g++",
+            "-c",
+            "-o",
+            "config_reader/config_reader.o",
+            "config_reader/config_reader.cpp"
+        ],
+        "directory": "/home/brandon/workspace/Harmony",
+        "file": "config_reader/config_reader.cpp"
+    }
+]
