@@ -34,7 +34,7 @@ std::map<std::string, Parameter> Parameter::as_map() const {
 }
 
 // Return bracer pair for c if it is valid, otherwise returns pair of '\001'
-const std::pair<char, char>& is_valid_bracer(char c) {
+const static std::pair<char, char>& is_valid_bracer(char c) {
   static const size_t delim_num = 6;
   static const std::array<std::pair<char, char>, delim_num> valid_bracers =
      {{ {'{', '}'}, {'[', ']'}, {'\'', '\''}, {'(', ')'}, {'\"', '\"'}, {'<', '>'} }};

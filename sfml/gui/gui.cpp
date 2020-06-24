@@ -14,15 +14,15 @@ auto duration_ms(Args&&... args) ->
 
 Background_Impl::Background_Impl(size_t width, size_t height, size_t pos_x,
                                  size_t pos_y, sf::Color color):
-  background_(sf::Vector2f(width, height)) {
-  background_.setPosition(sf::Vector2f(pos_x, pos_y));
+  background_(sf::Vector2f(static_cast<float>(width), static_cast<float>(height))) {
+  background_.setPosition(sf::Vector2f(static_cast<float>(pos_x), static_cast<float>(pos_y)));
   background_.setFillColor(color);
 }
 
 Text_Display_Impl::Text_Display_Impl(size_t width, size_t height, size_t pos_x,
                                      size_t pos_y, const std::string& text, sf::Color bg):
-  background_(sf::Vector2f(width, height)) {
-  background_.setPosition(sf::Vector2f(pos_x, pos_y));
+  background_(sf::Vector2f(static_cast<float>(width), static_cast<float>(height))) {
+  background_.setPosition(sf::Vector2f(static_cast<float>(pos_x), static_cast<float>(pos_y)));
   background_.setFillColor(bg);
   text_.setString(text);
   text_.setFillColor(Base_Scheme.text_);
@@ -34,8 +34,8 @@ void Text_Display_Impl::GUI_sizing(const sf::Font& font) {
     sf::Vector2f size = background_.getSize();
     // Select max font size
     unsigned int max_char_width = static_cast<unsigned int>(size.x) / text_.getString().getSize();
-    text_.setCharacterSize(max_char_width < size.y ? max_char_width :
-                                                     static_cast<unsigned int>(size.y));
+    text_.setCharacterSize(static_cast<float>(max_char_width) < size.y ? max_char_width :
+                                              static_cast<unsigned int>(size.y));
 
     // Helper lambda to get offset vector for first position set
     auto center_pos_TL = [](sf::FloatRect out, sf::FloatRect in){
@@ -130,14 +130,14 @@ void Gui::gui_loop(const sf::RenderWindow& window) {
       if(sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
         sf::Vector2i position = sf::Mouse::getPosition(window);
         for(auto& [key, button] : toggle_buttons_) {
-          if(button->is_clicked(position.x, position.y)) {
+          if(button->is_clicked(static_cast<float>(position.x), static_cast<float>(position.y))) {
             button->toggle();
             deactivate_links(key);
             new_state_ = true;
           }
         }
         for(auto& [key, button] : push_buttons_) {
-          if(button->is_clicked(position.x, position.y)) {
+          if(button->is_clicked(static_cast<float>(position.x), static_cast<float>(position.y))) {
             button->activate();
             new_state_ = true;
           }

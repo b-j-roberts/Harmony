@@ -21,8 +21,8 @@ void linear_Range_Shader_Impl(sf::RenderWindow& window, const std::vector<std::v
                          const Shader& shader, float range_min, float range_max,
                          std::function<bool(size_t, size_t)> conditional) {
   const sf::Vector2u window_size(window.getView().getSize());
-  const float pixel_x = window_size.x * 1.f / vec[0].size();
-  const float pixel_y = window_size.y * 1.f / vec.size();
+  const float pixel_x = static_cast<float>(window_size.x) / static_cast<float>(vec[0].size());
+  const float pixel_y = static_cast<float>(window_size.y) / static_cast<float>(vec.size());
 
   sf::RectangleShape pixel;
   pixel.setSize(sf::Vector2f(pixel_x, pixel_y));
@@ -67,8 +67,8 @@ void linear_Range_Shader_Dots(sf::RenderWindow& window, const std::vector<std::v
 void make_Or_Break_Impl(sf::RenderWindow& window, const std::vector<std::vector<float>>& vec,
                         const sf::Color& color, std::function<bool(float)> conditional) {
   const sf::Vector2u window_size(window.getView().getSize());
-  const float pixel_x = window_size.x * 1.f / vec[0].size();
-  const float pixel_y = window_size.y * 1.f / vec.size();
+  const float pixel_x = static_cast<float>(window_size.x) / static_cast<float>(vec[0].size());
+  const float pixel_y = static_cast<float>(window_size.y) / static_cast<float>(vec.size());
 
   sf::RectangleShape pixel;
   pixel.setSize(sf::Vector2f(pixel_x, pixel_y));

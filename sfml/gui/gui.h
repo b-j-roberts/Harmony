@@ -157,7 +157,7 @@ public:
 
   bool get_state() const { return state_; }
   // Returns if passed coordinates are inside button range
-  bool is_clicked(int x, int y) const { return background_.getGlobalBounds().contains(x, y); }
+  bool is_clicked(float x, float y) const { return background_.getGlobalBounds().contains(x, y); }
   // Toggles state_ & corresonding color
   void toggle();
   friend Gui;
@@ -211,7 +211,7 @@ public:
   // Returns state_ ( & sets state_ to false after being called, so only get one true per click )
   bool get_state();
   // Returns if passed coordinates are inside button range
-  bool is_clicked(int x, int y) const { return background_.getGlobalBounds().contains(x, y); }
+  bool is_clicked(float x, float y) const { return background_.getGlobalBounds().contains(x, y); }
   // Set state_, active characteristics, & start timer - if !active_
   void activate(); 
   // Deactivate after timer is up

@@ -1,19 +1,14 @@
 [
     {
         "arguments": [
-            "g++",
+            "clang++",
             "-c",
-            "-o",
-            "math/arb_int/arb_int.o",
-            "math/arb_int/arb_int.cpp"
-        ],
-        "directory": "/home/brandon/workspace/Harmony",
-        "file": "math/arb_int/arb_int.cpp"
-    },
-    {
-        "arguments": [
-            "g++",
-            "-c",
+            "-Weverything",
+            "-Wextra",
+            "-Wno-c++98-compat",
+            "-Wno-padded",
+            "-Wno-global-constructors",
+            "-Wno-switch-enum",
             "-std=c++1z",
             "-o",
             "math/rational/rational.o",
@@ -24,19 +19,14 @@
     },
     {
         "arguments": [
-            "g++",
+            "clang++",
             "-c",
-            "-o",
-            "logger/logger.o",
-            "logger/logger.cpp"
-        ],
-        "directory": "/home/brandon/workspace/Harmony",
-        "file": "logger/logger.cpp"
-    },
-    {
-        "arguments": [
-            "g++",
-            "-c",
+            "-Weverything",
+            "-Wextra",
+            "-Wno-c++98-compat",
+            "-Wno-padded",
+            "-Wno-global-constructors",
+            "-Wno-switch-enum",
             "-std=c++1z",
             "-o",
             "sfml/gui/gui.o",
@@ -47,8 +37,14 @@
     },
     {
         "arguments": [
-            "g++",
+            "clang++",
             "-c",
+            "-Weverything",
+            "-Wextra",
+            "-Wno-c++98-compat",
+            "-Wno-padded",
+            "-Wno-global-constructors",
+            "-Wno-switch-enum",
             "-std=c++1z",
             "-o",
             "arg_parser/template_version/arg_parser.o",
@@ -59,8 +55,14 @@
     },
     {
         "arguments": [
-            "g++",
+            "clang++",
             "-c",
+            "-Weverything",
+            "-Wextra",
+            "-Wno-c++98-compat",
+            "-Wno-padded",
+            "-Wno-global-constructors",
+            "-Wno-switch-enum",
             "-o",
             "sfml/vector_visual/2D_vector_height.o",
             "sfml/vector_visual/2D_vector_height.cpp"
@@ -70,8 +72,49 @@
     },
     {
         "arguments": [
-            "g++",
+            "clang++",
             "-c",
+            "-Weverything",
+            "-Wextra",
+            "-Wno-c++98-compat",
+            "-Wno-padded",
+            "-Wno-global-constructors",
+            "-Wno-switch-enum",
+            "-Wno-format-nonliteral",
+            "-o",
+            "logger/logger.o",
+            "logger/logger.cpp"
+        ],
+        "directory": "/home/brandon/workspace/Harmony",
+        "file": "logger/logger.cpp"
+    },
+    {
+        "arguments": [
+            "clang++",
+            "-c",
+            "-Weverything",
+            "-Wextra",
+            "-Wno-c++98-compat",
+            "-Wno-padded",
+            "-Wno-global-constructors",
+            "-Wno-switch-enum",
+            "-o",
+            "math/arb_int/arb_int.o",
+            "math/arb_int/arb_int.cpp"
+        ],
+        "directory": "/home/brandon/workspace/Harmony",
+        "file": "math/arb_int/arb_int.cpp"
+    },
+    {
+        "arguments": [
+            "clang++",
+            "-c",
+            "-Weverything",
+            "-Wextra",
+            "-Wno-c++98-compat",
+            "-Wno-padded",
+            "-Wno-global-constructors",
+            "-Wno-switch-enum",
             "-o",
             "config_reader/config_reader.o",
             "config_reader/config_reader.cpp"
